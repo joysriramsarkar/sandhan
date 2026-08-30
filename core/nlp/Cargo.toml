@@ -1,0 +1,9 @@
+[package]
+name = "sondhan-nlp"
+version = "0.1.0"
+edition = "2021"
+license = "AGPL-3.0-or-later"
+description = "সন্ধান — বাংলা প্রাকৃতিক ভাষা প্রক্রিয়াকরণ ও বানান-সংশোধন"
+
+[dependencies]
+unicode-normalization = "0.1"

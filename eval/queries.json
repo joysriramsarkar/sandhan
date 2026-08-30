@@ -1,0 +1,32 @@
+[
+  {
+    "query": "রবীন্দ্রনাথ ঠাকুর",
+    "intent": "person",
+    "expected_top": ["https://bn.wikipedia.org/wiki/রবীন্দ্রনাথ_ঠাকুর"],
+    "has_knowledge_panel": true
+  },
+  {
+    "query": "বাংলাদেশ",
+    "intent": "country",
+    "expected_top": ["https://bn.wikipedia.org/wiki/বাংলাদেশ"],
+    "has_knowledge_panel": true
+  },
+  {
+    "query": "পদ্মা সেতু",
+    "intent": "infrastructure",
+    "expected_top": ["https://bn.wikipedia.org/wiki/পদ্মা_সেতু"],
+    "has_knowledge_panel": true
+  },
+  {
+    "query": "ঢাকা",
+    "intent": "city",
+    "expected_top": ["https://bn.wikipedia.org/wiki/ঢাকা"],
+    "has_knowledge_panel": true
+  },
+  {
+    "query": "২৫ * ৪৮",
+    "intent": "calculator",
+    "expected_instant": "১,২০০",
+    "has_knowledge_panel": false
+  }
+]

@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" fill="none">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a1210"/>
+      <stop offset="60%" stop-color="#0e1b17"/>
+      <stop offset="100%" stop-color="#142822"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="30%" r="60%">
+      <stop offset="0%" stop-color="#0e7a63" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#0e7a63" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="markGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2fbf9a"/>
+      <stop offset="100%" stop-color="#f0954f"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#bgGrad)"/>
+  <rect width="1200" height="630" fill="url(#glow)"/>
+
+  <!-- Decorative grid lines -->
+  <g opacity="0.08" stroke="#ffffff" stroke-width="1">
+    <line x1="100" y1="0" x2="100" y2="630"/>
+    <line x1="300" y1="0" x2="300" y2="630"/>
+    <line x1="600" y1="0" x2="600" y2="630"/>
+    <line x1="900" y1="0" x2="900" y2="630"/>
+    <line x1="1100" y1="0" x2="1100" y2="630"/>
+    <line x1="0" y1="150" x2="1200" y2="150"/>
+    <line x1="0" y1="315" x2="1200" y2="315"/>
+    <line x1="0" y1="480" x2="1200" y2="480"/>
+  </g>
+
+  <!-- Logo Mark -->
+  <g transform="translate(140, 160)">
+    <rect width="130" height="130" rx="36" fill="url(#markGrad)"/>
+    <path d="M42 90 C36 82 34 72 34 58 C34 40 48 30 66 30 C84 30 96 40 96 58 C96 74 85 84 69 86 C61 87 56 84 52 78 C50 72 50 62 60 57 C68 53 81 54 86 62" 
+          stroke="#06231b" stroke-width="8.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="66" cy="58" r="6" fill="#06231b"/>
+  </g>
+
+  <!-- Title & Headline -->
+  <text x="310" y="240" font-family="'Noto Serif Bengali', 'Noto Serif', serif" font-weight="900" font-size="88" fill="#e9efe9" letter-spacing="-1">সন্ধান</text>
+  <text x="310" y="285" font-family="'Noto Sans Bengali', sans-serif" font-weight="600" font-size="24" fill="#2fbf9a" letter-spacing="3">SONDHAN · PRIVACY-FIRST SEARCH</text>
+
+  <!-- Tagline -->
+  <text x="140" y="380" font-family="'Noto Serif Bengali', serif" font-weight="600" font-size="38" fill="#ffffff">খুঁজুন নিশ্চিন্তে — আপনার সার্চ, শুধুই আপনার।</text>
+  <text x="140" y="425" font-family="'Noto Sans Bengali', sans-serif" font-weight="400" font-size="22" fill="#a3b3ab">
+    শূন্য-জ্ঞান এনক্রিপ্টেড হিস্টরি · স্বচ্ছ র‍্যাংকিং · কোনো ট্র্যাকিং নেই · শতভাগ মুক্ত ও ওপেনসোর্স
+  </text>
+
+  <!-- Badges -->
+  <g transform="translate(140, 480)">
+    <rect width="170" height="44" rx="22" fill="#1c332b" stroke="#2fbf9a" stroke-width="1.5"/>
+    <text x="85" y="28" font-family="'IBM Plex Mono', monospace" font-size="15" font-weight="600" fill="#2fbf9a" text-anchor="middle">AGPL-3.0 OPEN</text>
+  </g>
+  <g transform="translate(330, 480)">
+    <rect width="210" height="44" rx="22" fill="#1c332b" stroke="#2fbf9a" stroke-width="1.5"/>
+    <text x="105" y="28" font-family="'IBM Plex Mono', monospace" font-size="15" font-weight="600" fill="#2fbf9a" text-anchor="middle">AES-256-GCM ZERO-K</text>
+  </g>
+  <g transform="translate(560, 480)">
+    <rect width="180" height="44" rx="22" fill="#3a2a1a" stroke="#f0954f" stroke-width="1.5"/>
+    <text x="90" y="28" font-family="'Noto Sans Bengali', sans-serif" font-size="15" font-weight="600" fill="#f0954f" text-anchor="middle">বাংলা-প্রথম সার্চ</text>
+  </g>
+</svg>

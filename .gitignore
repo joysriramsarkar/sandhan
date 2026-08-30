@@ -1,0 +1,69 @@
+# Dependencies
+**/node_modules/
+node_modules/
+package-lock.json.bak
+pnpm-lock.yaml.bak
+
+# SvelteKit & Build outputs
+**/.svelte-kit/
+.svelte-kit/
+**/build/
+build/
+**/dist/
+dist/
+**/.output/
+.output/
+
+# Rust / Cargo build outputs
+**/target/
+target/
+**/*.rs.bk
+Cargo.lock.bak
+
+# Python artifacts
+**/__pycache__/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.coverage
+htmlcov/
+venv/
+.venv/
+env/
+
+# Environment variables & secrets
+.env
+.env.*
+!.env.example
+
+# Logs & Temporary files
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.system_generated/
+scratch/
+test-*.js
+test-*.py
+test_parse.py
+*.tmp
+*.html.bak
+ddg_out.html
+ddg_antigravity.html
+
+# OS generated files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE & Editors
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

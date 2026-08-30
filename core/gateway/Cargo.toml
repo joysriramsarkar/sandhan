@@ -1,0 +1,20 @@
+[package]
+name = "sondhan-gateway"
+version = "0.1.0"
+edition = "2021"
+license = "AGPL-3.0-or-later"
+description = "সন্ধান — গোপনীয়তা-প্রথম সার্চ গেটওয়ে"
+
+[dependencies]
+axum = "0.7"
+tokio = { version = "1", features = ["full"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+uuid = { version = "1", features = ["v4"] }
+tracing = "0.1"
+tracing-subscriber = "0.3"
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "json"] }
+
+[dev-dependencies]
+tower = { version = "0.4", features = ["util"] }
+http-body-util = "0.1"

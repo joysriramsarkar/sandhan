@@ -1,0 +1,16 @@
+[package]
+name = "sondhan-crawler"
+version = "0.1.0"
+edition = "2021"
+license = "AGPL-3.0-or-later"
+description = "সন্ধান — বণ্টিত ও নীতিমান ওয়েব ক্রলার"
+
+[dependencies]
+tokio = { version = "1", features = ["full"] }
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls"] }
+scraper = "0.19"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tracing = "0.1"
+tracing-subscriber = "0.3"
+url = "2"
