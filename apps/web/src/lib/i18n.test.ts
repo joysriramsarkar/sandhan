@@ -10,7 +10,7 @@ describe('i18n Module', () => {
 
 	it('should return English translations when set', () => {
 		setLocale('en');
-		expect(t('appName')).toBe('Sondhan');
+		expect(t('appName')).toBe('sandhan');
 		expect(t('tabs.all')).toBe('All');
 	});
 

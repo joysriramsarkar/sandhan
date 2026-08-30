@@ -56,23 +56,23 @@
 		<div class="service-list">
 			<div class="service-row">
 				<span class="s-name">API Gateway (Rust / Axum)</span>
-				<span class="s-status online">🟢 সচল (Health: OK)</span>
+				<span class="s-status">🟢 সচল (Health: OK)</span>
 			</div>
 			<div class="service-row">
 				<span class="s-name">Zero-Knowledge Sync Store</span>
-				<span class="s-status online">🟢 সচল (AES-256-GCM)</span>
+				<span class="s-status">🟢 সচল (AES-256-GCM)</span>
 			</div>
 			<div class="service-row">
 				<span class="s-name">Bengali NLP & Spell Checker</span>
-				<span class="s-status online">🟢 সচল (১০,০০০+ শব্দভাণ্ডার)</span>
+				<span class="s-status">🟢 সচল (১০,০০০+ শব্দভাণ্ডার)</span>
 			</div>
 			<div class="service-row">
 				<span class="s-name">OpenSearch / Vespa Cluster</span>
-				<span class="s-status online">🟢 ৪টি নোড সক্রিয়</span>
+				<span class="s-status">🟢 ৪টি নোড সক্রিয়</span>
 			</div>
 			<div class="service-row">
 				<span class="s-name">Polite Crawler Pipeline</span>
-				<span class="s-status online">🟢 শিডিউলড (Rate Limit Safe)</span>
+				<span class="s-status">🟢 শিডিউলড (Rate Limit Safe)</span>
 			</div>
 		</div>
 	</div>
@@ -80,13 +80,14 @@
 
 <style>
 	.dashboard-container {
-		max-width: 960px;
+		max-width: 900px;
 		margin: 0 auto;
-		padding: 20px 0;
+		padding: 16px 0;
+		width: 100%;
 	}
 	.dashboard-header {
 		text-align: center;
-		margin-bottom: 30px;
+		margin-bottom: 24px;
 	}
 	.badge {
 		display: inline-block;
@@ -94,85 +95,92 @@
 		border-radius: 20px;
 		background: var(--chip);
 		color: var(--accent);
-		font-size: 0.85rem;
+		font-size: 0.82rem;
 		font-weight: 600;
-		margin-bottom: 8px;
+		margin-bottom: 6px;
 	}
 	.page-title {
 		font-family: 'Noto Serif Bengali', serif;
-		font-size: 2.2rem;
+		font-size: clamp(1.6rem, 5vw, 2.2rem);
 		font-weight: 900;
 		color: var(--ink);
-		margin-bottom: 8px;
+		margin-bottom: 6px;
 	}
 	.page-subtitle {
-		font-size: 0.95rem;
+		font-size: clamp(0.85rem, 3vw, 0.95rem);
 		color: var(--ink-soft);
 	}
 	.metrics-grid {
 		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-		gap: 16px;
-		margin-bottom: 30px;
+		grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+		gap: 12px;
+		margin-bottom: 20px;
 	}
 	.metric-card {
 		background: var(--bg-elev);
 		border: 1px solid var(--line);
-		border-radius: 18px;
-		padding: 22px;
+		border-radius: 14px;
+		padding: 16px;
 		box-shadow: var(--shadow);
+		display: flex;
+		flex-direction: column;
 	}
 	.m-label {
-		font-size: 0.82rem;
+		font-size: 0.78rem;
 		color: var(--ink-soft);
 		font-weight: 600;
-		margin-bottom: 8px;
+		margin-bottom: 4px;
 	}
 	.m-val {
 		font-family: 'Outfit', sans-serif;
-		font-size: 2.2rem;
+		font-size: clamp(1.4rem, 4vw, 1.8rem);
 		font-weight: 900;
 		color: var(--accent);
-		line-height: 1.1;
-		margin-bottom: 6px;
+		line-height: 1.2;
 	}
 	.m-sub {
-		font-size: 0.8rem;
+		font-size: 0.72rem;
 		color: var(--ink-faint);
+		margin-top: 4px;
 	}
 	.system-health-box {
 		background: var(--bg-elev);
 		border: 1px solid var(--line);
-		border-radius: 20px;
-		padding: 28px;
+		border-radius: 16px;
+		padding: clamp(16px, 4vw, 24px);
 		box-shadow: var(--shadow);
+		margin-bottom: 18px;
+		word-break: break-word;
 	}
 	.system-health-box h2 {
 		font-family: 'Noto Serif Bengali', serif;
-		font-size: 1.3rem;
-		margin-bottom: 18px;
+		font-size: 1.25rem;
+		margin-bottom: 12px;
 		color: var(--ink);
 	}
 	.service-list {
 		display: flex;
 		flex-direction: column;
-		gap: 12px;
+		gap: 8px;
 	}
 	.service-row {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		padding: 12px 16px;
+		padding: 10px 14px;
 		border-radius: 10px;
 		background: var(--bg);
 		border: 1px solid var(--line);
+		flex-wrap: wrap;
+		gap: 6px;
 	}
 	.s-name {
 		font-weight: 600;
 		color: var(--ink);
+		font-size: 0.9rem;
 	}
 	.s-status {
-		font-size: 0.88rem;
+		font-size: 0.82rem;
 		font-weight: 600;
 		color: var(--accent);
 	}

@@ -129,31 +129,33 @@
 	}
 	.page-title {
 		font-family: 'Noto Serif Bengali', serif;
-		font-size: 2.2rem;
+		font-size: clamp(1.6rem, 5vw, 2.2rem);
 		font-weight: 900;
 		color: var(--ink);
 		margin-bottom: 8px;
 	}
 	.page-subtitle {
-		font-size: 0.95rem;
+		font-size: clamp(0.85rem, 3vw, 0.95rem);
 		color: var(--ink-soft);
 	}
 	.judge-card {
 		background: var(--bg-elev);
 		border: 1px solid var(--line);
-		border-radius: 20px;
-		padding: 28px;
+		border-radius: 16px;
+		padding: clamp(16px, 4vw, 28px);
 		box-shadow: var(--shadow);
+		word-break: break-word;
 	}
 	.task-query-box {
 		background: var(--bg-soft);
 		border: 1px solid var(--line);
 		border-radius: 12px;
-		padding: 14px 18px;
+		padding: 12px 14px;
 		display: flex;
 		align-items: center;
-		gap: 10px;
-		margin-bottom: 20px;
+		gap: 8px;
+		margin-bottom: 16px;
+		flex-wrap: wrap;
 	}
 	.q-label {
 		font-size: 0.85rem;
@@ -161,92 +163,97 @@
 		font-weight: 600;
 	}
 	.q-val {
-		font-size: 1.15rem;
+		font-size: 1.1rem;
 		font-weight: 700;
 		color: var(--accent);
+		word-break: break-word;
 	}
 	.doc-preview {
 		background: var(--bg);
 		border: 1px solid var(--line);
-		border-radius: 14px;
-		padding: 20px;
-		margin-bottom: 24px;
+		border-radius: 12px;
+		padding: 16px;
+		margin-bottom: 20px;
+		word-break: break-word;
 	}
 	.doc-title {
 		font-family: 'Noto Serif Bengali', serif;
-		font-size: 1.3rem;
+		font-size: clamp(1.1rem, 4vw, 1.3rem);
 		font-weight: 700;
 		margin-bottom: 4px;
 		color: var(--ink);
 	}
 	.doc-url {
-		font-size: 0.82rem;
+		font-size: 0.8rem;
 		color: var(--accent);
 		display: inline-block;
-		margin-bottom: 10px;
+		margin-bottom: 8px;
 		word-break: break-all;
 	}
 	.doc-snippet {
-		font-size: 0.94rem;
+		font-size: 0.9rem;
 		color: var(--ink-soft);
-		line-height: 1.6;
+		line-height: 1.55;
+		word-break: break-word;
 	}
 	.grading-section h3 {
-		font-size: 1rem;
-		margin-bottom: 14px;
+		font-size: 0.95rem;
+		margin-bottom: 12px;
 		color: var(--ink);
 	}
 	.grade-buttons {
 		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-		gap: 10px;
+		grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+		gap: 8px;
 	}
 	.grade-btn {
 		background: var(--bg);
 		border: 1.5px solid var(--line);
-		border-radius: 12px;
-		padding: 14px 10px;
+		border-radius: 10px;
+		padding: 10px 8px;
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		gap: 4px;
+		gap: 2px;
 		transition: all 0.2s;
 	}
 	.grade-btn:hover {
 		border-color: var(--accent);
-		transform: translateY(-2px);
 		background: var(--bg-soft);
 	}
 	.g-num {
 		font-family: 'Outfit', sans-serif;
-		font-size: 1.5rem;
+		font-size: 1.35rem;
 		font-weight: 900;
 		color: var(--ink);
 	}
 	.g-text {
-		font-size: 0.78rem;
+		font-size: 0.72rem;
 		font-weight: 600;
 		color: var(--ink-soft);
 		text-align: center;
 	}
 	.g-3 .g-num { color: var(--accent); }
 	.toast-message {
-		margin-top: 16px;
-		padding: 12px;
-		border-radius: 10px;
+		margin-top: 14px;
+		padding: 10px;
+		border-radius: 8px;
 		background: var(--chip);
 		color: var(--accent);
 		font-weight: 600;
 		text-align: center;
+		font-size: 0.85rem;
 		animation: fadeIn 0.2s;
 	}
 	.judge-stats {
-		margin-top: 24px;
+		margin-top: 20px;
 		border-top: 1px solid var(--line);
-		padding-top: 16px;
+		padding-top: 12px;
 		display: flex;
 		justify-content: space-between;
-		font-size: 0.85rem;
+		font-size: 0.82rem;
 		color: var(--ink-soft);
+		flex-wrap: wrap;
+		gap: 6px;
 	}
 </style>

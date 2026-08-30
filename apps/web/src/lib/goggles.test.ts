@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseGoggleRules, applyGoggles, type SearchResult } from './goggles';
+import { parseGoggleRules, applyGoggles, encodeGoggleUrl, decodeGoggleUrl, type SearchResult } from './goggles';
 
 describe('Goggles Reranker Engine', () => {
 	it('should parse Goggles DSL rules properly', () => {
@@ -44,4 +44,13 @@ describe('Goggles Reranker Engine', () => {
 		expect(reranked[reranked.length - 1].title).toBe('Spam Forum');
 		expect(reranked[reranked.length - 1].score).toBe(0.5);
 	});
+
+	it('should encode and decode goggle URLs cleanly', () => {
+		const dsl = '$boost=3,site=ac.bd\n$discard,site=spam.com';
+		const encoded = encodeGoggleUrl(dsl);
+		expect(encoded).toBeTruthy();
+		const decoded = decodeGoggleUrl(encoded);
+		expect(decoded).toBe(dsl);
+	});
 });
+

@@ -14,6 +14,7 @@ mod sync;
 #[tokio::main]
 async fn main() {
     tracing_subscriber::fmt().with_target(false).init();
+    metrics::init_metrics();
 
     let app = Router::new()
         .route("/healthz", get(|| async { "ok" }))

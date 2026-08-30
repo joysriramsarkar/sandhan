@@ -1,4 +1,4 @@
-# Contributing to Sondhan (সন্ধান)
+# Contributing to sandhan (সন্ধান)
 
 Thank you for helping build a free, open, and private search engine for the world!
 

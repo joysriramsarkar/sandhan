@@ -13,7 +13,7 @@ pub fn truncate_ip(ip: IpAddr) -> String {
         }
         IpAddr::V6(v6) => {
             let s = v6.segments();
-            format!("{:x}:{:x}:{:x}:{:x}::", s[0], s[1], s[2], s[3])
+            format!("{:x}:{:x}:{:x}::", s[0], s[1], s[2])
         }
     }
 }
@@ -23,7 +23,7 @@ pub async fn ephemeral_request(mut req: Request, next: Next) -> Response {
     req.extensions_mut().insert(req_id);
     let mut resp = next.run(req).await;
     resp.headers_mut().insert(
-        "x-sondhan-privacy",
+        "x-sandhan-privacy",
         "zero-logs; ip-truncated; encrypted-history".parse().unwrap(),
     );
     resp
@@ -43,6 +43,6 @@ mod tests {
     #[test]
     fn ipv6_truncate_test() {
         let ip = IpAddr::V6(Ipv6Addr::new(0x2001, 0xdb8, 0x1234, 0x5678, 0xaaaa, 0xbbbb, 0xcccc, 0xdddd));
-        assert_eq!(truncate_ip(ip), "2001:db8:1234:5678::");
+        assert_eq!(truncate_ip(ip), "2001:db8:1234::");
     }
 }

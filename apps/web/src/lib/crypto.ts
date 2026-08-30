@@ -6,16 +6,9 @@
 const enc = new TextEncoder();
 const dec = new TextDecoder();
 
-export let KDF_ITERATIONS = 210000;
-
-export function _setKdfIterations(n: number): void {
-	KDF_ITERATIONS = n;
-}
+export const KDF_ITERATIONS = 210000;
 
 export function toBase64(u8: Uint8Array): string {
-	if (typeof Buffer !== 'undefined') {
-		return Buffer.from(u8).toString('base64');
-	}
 	let binary = '';
 	for (let i = 0; i < u8.byteLength; i++) {
 		binary += String.fromCharCode(u8[i]);
@@ -24,9 +17,6 @@ export function toBase64(u8: Uint8Array): string {
 }
 
 export function fromBase64(s: string): Uint8Array {
-	if (typeof Buffer !== 'undefined') {
-		return new Uint8Array(Buffer.from(s, 'base64'));
-	}
 	const binary = atob(s);
 	const bytes = new Uint8Array(binary.length);
 	for (let i = 0; i < binary.length; i++) {
@@ -39,17 +29,21 @@ export function getOrCreateSalt(): Uint8Array {
 	if (typeof localStorage === 'undefined') {
 		return crypto.getRandomValues(new Uint8Array(16));
 	}
-	let saltB64 = localStorage.getItem('sondhan_salt');
+	let saltB64 = localStorage.getItem('sandhan_salt');
 	if (!saltB64) {
 		const newSalt = crypto.getRandomValues(new Uint8Array(16));
 		saltB64 = toBase64(newSalt);
-		localStorage.setItem('sondhan_salt', saltB64);
+		localStorage.setItem('sandhan_salt', saltB64);
 	}
 	return fromBase64(saltB64);
 }
 
-export async function deriveKey(passphrase: string, salt?: Uint8Array): Promise<CryptoKey> {
-	const currentSalt = salt || getOrCreateSalt();
+export async function deriveKey(
+	passphrase: string,
+	salt?: Uint8Array,
+	iterations = KDF_ITERATIONS
+): Promise<CryptoKey> {
+	const currentSalt = (salt || getOrCreateSalt()) as Uint8Array;
 	const baseKey = await crypto.subtle.importKey(
 		'raw',
 		enc.encode(passphrase),
@@ -61,8 +55,8 @@ export async function deriveKey(passphrase: string, salt?: Uint8Array): Promise<
 	return crypto.subtle.deriveKey(
 		{
 			name: 'PBKDF2',
-			salt: currentSalt,
-			iterations: KDF_ITERATIONS,
+			salt: currentSalt as BufferSource,
+			iterations,
 			hash: 'SHA-256'
 		},
 		baseKey,
@@ -81,7 +75,7 @@ export async function encryptJSON<T>(key: CryptoKey, data: T): Promise<Encrypted
 	const iv = crypto.getRandomValues(new Uint8Array(12));
 	const plaintext = enc.encode(JSON.stringify(data));
 	const ciphertext = await crypto.subtle.encrypt(
-		{ name: 'AES-GCM', iv },
+		{ name: 'AES-GCM', iv: iv as BufferSource },
 		key,
 		plaintext
 	);
@@ -96,9 +90,9 @@ export async function decryptJSON<T>(key: CryptoKey, payload: EncryptedPayload):
 	const iv = fromBase64(payload.iv);
 	const ct = fromBase64(payload.ct);
 	const plaintextBuffer = await crypto.subtle.decrypt(
-		{ name: 'AES-GCM', iv },
+		{ name: 'AES-GCM', iv: iv as BufferSource },
 		key,
-		ct
+		ct as BufferSource
 	);
 
 	return JSON.parse(dec.decode(plaintextBuffer)) as T;

@@ -2,31 +2,49 @@
   {
     "query": "রবীন্দ্রনাথ ঠাকুর",
     "intent": "person",
-    "expected_top": ["https://bn.wikipedia.org/wiki/রবীন্দ্রনাথ_ঠাকুর"],
-    "has_knowledge_panel": true
+    "expected_top": ["bn.wikipedia.org/wiki/রবীন্দ্রনাথ_ঠাকুর"],
+    "relevant_domains": ["wikipedia.org", "banglapedia.org", "rabindrasangeet.org", "du.ac.bd"]
   },
   {
-    "query": "বাংলাদেশ",
-    "intent": "country",
-    "expected_top": ["https://bn.wikipedia.org/wiki/বাংলাদেশ"],
-    "has_knowledge_panel": true
+    "query": "বাংলাদেশ জাতীয় সংসদ",
+    "intent": "institution",
+    "expected_top": ["parliament.gov.bd", "bn.wikipedia.org/wiki/জাতীয়_সংসদ"],
+    "relevant_domains": ["gov.bd", "wikipedia.org", "banglapedia.org"]
   },
   {
-    "query": "পদ্মা সেতু",
+    "query": "পদ্মা সেতু নির্মাণ ইতিহাস",
     "intent": "infrastructure",
-    "expected_top": ["https://bn.wikipedia.org/wiki/পদ্মা_সেতু"],
-    "has_knowledge_panel": true
+    "expected_top": ["padmabridge.gov.bd", "bn.wikipedia.org/wiki/পদ্মা_সেতু"],
+    "relevant_domains": ["gov.bd", "wikipedia.org", "bdnews24.com", "prothomalo.com"]
   },
   {
-    "query": "ঢাকা",
-    "intent": "city",
-    "expected_top": ["https://bn.wikipedia.org/wiki/ঢাকা"],
-    "has_knowledge_panel": true
+    "query": "ঢাকা বিশ্ববিদ্যালয় ভর্তি",
+    "intent": "education",
+    "expected_top": ["du.ac.bd", "admission.eis.du.ac.bd"],
+    "relevant_domains": ["du.ac.bd", "ac.bd", "gov.bd"]
   },
   {
-    "query": "২৫ * ৪৮",
-    "intent": "calculator",
-    "expected_instant": "১,২০০",
-    "has_knowledge_panel": false
+    "query": "Python programming tutorial",
+    "intent": "tech",
+    "expected_top": ["python.org", "docs.python.org"],
+    "relevant_domains": ["python.org", "w3schools.com", "realpython.com", "github.com"]
+  },
+  {
+    "query": "কাজী নজরুল ইসলাম কবিতা",
+    "intent": "literature",
+    "expected_top": ["bn.wikipedia.org/wiki/কাজী_নজরুল_ইসলাম", "nazrulinstitute.gov.bd"],
+    "relevant_domains": ["gov.bd", "wikipedia.org", "banglasahitya.org"]
+  },
+  {
+    "query": "বঙ্গবন্ধু শেখ মুজিবুর রহমান",
+    "intent": "history",
+    "expected_top": ["bn.wikipedia.org/wiki/শেখ_মুজিবুর_রহমান", "mujib100.gov.bd"],
+    "relevant_domains": ["gov.bd", "wikipedia.org", "banglapedia.org"]
+  },
+  {
+    "query": "সুন্দরবন ম্যানগ্রোভ বন",
+    "intent": "geography",
+    "expected_top": ["bn.wikipedia.org/wiki/সুন্দরবন", "bforest.gov.bd"],
+    "relevant_domains": ["gov.bd", "unesco.org", "wikipedia.org"]
   }
 ]

@@ -2,7 +2,7 @@
 	import { t } from '$lib/i18n';
 	import { deriveKey, encryptJSON, decryptJSON, type EncryptedPayload } from '$lib/crypto';
 
-	let labPassphrase = 'sondhan-vault-key-2026';
+	let labPassphrase = 'sandhan-vault-key-2026';
 	let labPlaintext = 'সন্ধান উন্মুক্ত সার্চ ইঞ্জিন — আপনার তথ্য আপনারই কাছে';
 	let encryptedResult: EncryptedPayload | null = null;
 	let decryptedResult: string | null = null;
@@ -124,11 +124,12 @@
 	.design-page {
 		max-width: 900px;
 		margin: 0 auto;
-		padding: 20px 0;
+		padding: 16px 0;
+		width: 100%;
 	}
 	.header-center {
 		text-align: center;
-		margin-bottom: 30px;
+		margin-bottom: 24px;
 	}
 	.badge {
 		display: inline-block;
@@ -136,90 +137,93 @@
 		border-radius: 20px;
 		background: var(--chip);
 		color: var(--accent);
-		font-size: 0.85rem;
+		font-size: 0.82rem;
 		font-weight: 600;
-		margin-bottom: 8px;
+		margin-bottom: 6px;
 	}
 	.page-title {
 		font-family: 'Noto Serif Bengali', serif;
-		font-size: 2.2rem;
+		font-size: clamp(1.6rem, 5vw, 2.2rem);
 		font-weight: 900;
 		color: var(--ink);
-		margin-bottom: 8px;
+		margin-bottom: 6px;
 	}
 	.page-subtitle {
-		font-size: 0.95rem;
+		font-size: clamp(0.85rem, 3vw, 0.95rem);
 		color: var(--ink-soft);
 	}
 	.section-card {
 		background: var(--bg-elev);
 		border: 1px solid var(--line);
-		border-radius: 20px;
-		padding: 28px;
+		border-radius: 16px;
+		padding: clamp(16px, 4vw, 28px);
 		box-shadow: var(--shadow);
-		margin-bottom: 24px;
+		margin-bottom: 20px;
+		word-break: break-word;
 	}
 	.section-card h2 {
 		font-family: 'Noto Serif Bengali', serif;
-		font-size: 1.35rem;
-		margin-bottom: 8px;
+		font-size: 1.25rem;
+		margin-bottom: 6px;
 		color: var(--ink);
 	}
 	.section-desc {
-		font-size: 0.92rem;
+		font-size: 0.88rem;
 		color: var(--ink-soft);
-		margin-bottom: 20px;
+		margin-bottom: 16px;
 	}
 	.form-group {
-		margin-bottom: 16px;
+		margin-bottom: 14px;
 	}
 	.form-group label {
 		display: block;
-		font-size: 0.88rem;
+		font-size: 0.85rem;
 		font-weight: 600;
 		color: var(--ink);
-		margin-bottom: 6px;
+		margin-bottom: 4px;
 	}
 	.form-group input {
 		width: 100%;
-		padding: 10px 14px;
-		border-radius: 10px;
+		padding: 8px 12px;
+		border-radius: 8px;
 		border: 1px solid var(--line);
 		background: var(--bg);
 		color: var(--ink);
 		font-family: inherit;
-		font-size: 1rem;
+		font-size: 0.95rem;
 	}
 	.action-row {
 		display: flex;
-		gap: 12px;
-		margin-top: 20px;
+		gap: 10px;
+		margin-top: 16px;
+		flex-wrap: wrap;
 	}
 	.primary-btn {
-		padding: 10px 20px;
-		border-radius: 10px;
+		padding: 8px 16px;
+		border-radius: 8px;
 		background: var(--accent);
 		color: var(--accent-ink);
 		font-weight: 600;
-		font-size: 0.92rem;
+		font-size: 0.88rem;
 	}
 	.secondary-btn {
-		padding: 10px 20px;
-		border-radius: 10px;
+		padding: 8px 16px;
+		border-radius: 8px;
 		background: var(--bg-soft);
 		border: 1px solid var(--line);
 		color: var(--ink);
 		font-weight: 600;
-		font-size: 0.92rem;
+		font-size: 0.88rem;
 	}
 	.code-box {
-		margin-top: 20px;
-		padding: 16px;
-		border-radius: 12px;
+		margin-top: 16px;
+		padding: 14px;
+		border-radius: 10px;
 		background: var(--code);
 		color: #2fbf9a;
 		font-family: 'IBM Plex Mono', monospace;
-		font-size: 0.85rem;
+		font-size: 0.82rem;
+		word-break: break-all;
 	}
 	.ct-block {
 		display: block;
@@ -227,34 +231,37 @@
 		margin-top: 4px;
 	}
 	.success-box {
-		margin-top: 16px;
-		padding: 14px;
-		border-radius: 12px;
+		margin-top: 14px;
+		padding: 12px;
+		border-radius: 10px;
 		background: var(--chip);
 		color: var(--accent);
 		font-weight: 600;
+		font-size: 0.88rem;
+		word-break: break-word;
 	}
 	.error-box {
-		margin-top: 16px;
-		padding: 14px;
-		border-radius: 12px;
+		margin-top: 14px;
+		padding: 12px;
+		border-radius: 10px;
 		background: #fbe8d8;
 		color: #d90429;
 		font-weight: 600;
+		font-size: 0.88rem;
 	}
 	.colors-grid {
 		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-		gap: 14px;
+		grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+		gap: 10px;
 	}
 	.color-tile {
-		border-radius: 14px;
-		padding: 16px;
+		border-radius: 12px;
+		padding: 12px;
 		display: flex;
 		flex-direction: column;
-		gap: 4px;
+		gap: 2px;
 	}
-	.color-tile b { font-size: 0.95rem; }
-	.color-tile span { font-family: 'IBM Plex Mono', monospace; font-size: 0.8rem; }
-	.color-tile small { opacity: 0.8; font-size: 0.75rem; }
+	.color-tile b { font-size: 0.88rem; }
+	.color-tile span { font-family: 'IBM Plex Mono', monospace; font-size: 0.75rem; }
+	.color-tile small { opacity: 0.8; font-size: 0.7rem; }
 </style>

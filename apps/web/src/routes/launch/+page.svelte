@@ -72,11 +72,12 @@
 	.launch-page {
 		max-width: 860px;
 		margin: 0 auto;
-		padding: 20px 0;
+		padding: 16px 0;
+		width: 100%;
 	}
 	.launch-header {
 		text-align: center;
-		margin-bottom: 32px;
+		margin-bottom: 24px;
 	}
 	.badge {
 		display: inline-block;
@@ -84,77 +85,78 @@
 		border-radius: 20px;
 		background: var(--chip);
 		color: var(--accent);
-		font-size: 0.85rem;
+		font-size: 0.82rem;
 		font-weight: 600;
-		margin-bottom: 8px;
+		margin-bottom: 6px;
 	}
 	.page-title {
 		font-family: 'Noto Serif Bengali', serif;
-		font-size: 2.4rem;
+		font-size: clamp(1.6rem, 5vw, 2.4rem);
 		font-weight: 900;
 		color: var(--ink);
-		margin-bottom: 8px;
+		margin-bottom: 6px;
 	}
 	.page-subtitle {
-		font-size: 1.05rem;
+		font-size: clamp(0.9rem, 3.2vw, 1.05rem);
 		color: var(--ink-soft);
 	}
 	.manifesto-card, .issues-card {
 		background: var(--bg-elev);
 		border: 1px solid var(--line);
-		border-radius: 20px;
-		padding: 30px;
+		border-radius: 16px;
+		padding: clamp(16px, 4vw, 30px);
 		box-shadow: var(--shadow);
-		margin-bottom: 24px;
+		margin-bottom: 20px;
+		word-break: break-word;
 	}
 	.manifesto-card h2, .issues-card h2 {
 		font-family: 'Noto Serif Bengali', serif;
-		font-size: 1.4rem;
-		margin-bottom: 14px;
+		font-size: 1.3rem;
+		margin-bottom: 12px;
 		color: var(--ink);
 	}
 	.manifesto-text {
-		font-size: 1rem;
+		font-size: 0.95rem;
 		color: var(--ink-soft);
-		line-height: 1.7;
-		margin-bottom: 16px;
+		line-height: 1.65;
+		margin-bottom: 14px;
 	}
 	.pillars-grid {
 		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-		gap: 16px;
-		margin-top: 24px;
+		grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+		gap: 12px;
+		margin-top: 18px;
 	}
 	.pillar {
 		background: var(--bg);
 		border: 1px solid var(--line);
-		border-radius: 14px;
-		padding: 18px;
+		border-radius: 12px;
+		padding: 14px;
 	}
 	.p-icon {
-		font-size: 24px;
-		margin-bottom: 8px;
+		font-size: 22px;
+		margin-bottom: 6px;
 	}
 	.pillar h4 {
 		font-family: 'Noto Serif Bengali', serif;
-		font-size: 1.05rem;
+		font-size: 1rem;
 		margin-bottom: 4px;
 		color: var(--ink);
 	}
 	.pillar p {
-		font-size: 0.86rem;
+		font-size: 0.84rem;
 		color: var(--ink-soft);
 	}
 	.issue-list {
 		display: flex;
 		flex-direction: column;
-		gap: 12px;
+		gap: 10px;
 	}
 	.issue-item {
 		background: var(--bg);
 		border: 1px solid var(--line);
-		border-radius: 12px;
-		padding: 16px;
+		border-radius: 10px;
+		padding: 14px;
 	}
 	.i-tag {
 		display: inline-block;
@@ -164,16 +166,16 @@
 		border-radius: 6px;
 		background: var(--chip);
 		color: var(--accent);
-		margin-bottom: 6px;
+		margin-bottom: 4px;
 	}
 	.issue-item b {
 		display: block;
-		font-size: 1rem;
+		font-size: 0.95rem;
 		color: var(--ink);
 		margin-bottom: 4px;
 	}
 	.issue-item p {
-		font-size: 0.88rem;
+		font-size: 0.85rem;
 		color: var(--ink-soft);
 	}
 </style>

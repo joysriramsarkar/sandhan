@@ -1,0 +1,19 @@
+{
+  "name": "সন্ধান — উন্মুক্ত সার্চ ইঞ্জিন",
+  "short_name": "সন্ধান",
+  "description": "একটি উন্মুক্ত, সার্বজনীন ও গোপনীয়তা-প্রথম সার্চ ইঞ্জিন",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0e1513",
+  "theme_color": "#0e7a63",
+  "lang": "bn",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

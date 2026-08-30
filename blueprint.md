@@ -213,7 +213,7 @@
 ## ১১. রিপোজিটরি কাঠামো (মোনোরেপো)
 
 ```
-sondhan/
+sandhan/
 ├── apps/
 │   ├── web/          # SvelteKit ফ্রন্টএন্ড
 │   └── mobile/       # পরে
@@ -661,8 +661,8 @@ sondhan/
 <script>
 /* ───────── থিম ও ভিউ ───────── */
 const html=document.documentElement;
-function toggleTheme(){const t=html.dataset.theme==='dark'?'light':'dark';html.dataset.theme=t;localStorage.sondhan_theme=t;document.getElementById('themeBtn').textContent=t==='dark'?'☀️':'🌙';}
-(function(){const s=localStorage.sondhan_theme||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');html.dataset.theme=s;document.getElementById('themeBtn').textContent=s==='dark'?'☀️':'🌙';})();
+function toggleTheme(){const t=html.dataset.theme==='dark'?'light':'dark';html.dataset.theme=t;localStorage.sandhan_theme=t;document.getElementById('themeBtn').textContent=t==='dark'?'☀️':'🌙';}
+(function(){const s=localStorage.sandhan_theme||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');html.dataset.theme=s;document.getElementById('themeBtn').textContent=s==='dark'?'☀️':'🌙';})();
 function show(v){document.querySelectorAll('section.view').forEach(s=>s.classList.remove('on'));document.getElementById('view-'+v).classList.add('on');document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.v===v));location.hash=v;window.scrollTo({top:0});}
 if(location.hash)show(location.hash.slice(1));
 
@@ -683,19 +683,19 @@ async function decryptJSON(key,{iv,ct}){
   const pt=await crypto.subtle.decrypt({name:'AES-GCM',iv:fb64(iv)},key,fb64(ct));
   return JSON.parse(dec.decode(pt));
 }
-function getSalt(){let s=localStorage.sondhan_salt;if(!s){s=b64(crypto.getRandomValues(new Uint8Array(16)));localStorage.sondhan_salt=s;}return fb64(s);}
+function getSalt(){let s=localStorage.sandhan_salt;if(!s){s=b64(crypto.getRandomValues(new Uint8Array(16)));localStorage.sandhan_salt=s;}return fb64(s);}
 
 /* ───────── ইতিহাস (এনক্রিপ্টেড) ───────── */
 let histKey=null,histUnlocked=false;
 async function pushHistory(q){
   try{
-    const key=await deriveKey('sondhan-default',getSalt()); // ডেমো: ডিফল্ট কী; বাস্তবে ব্যবহারকারীর পাসফ্রেজ
+    const key=await deriveKey('sandhan-default',getSalt()); // ডেমো: ডিফল্ট কী; বাস্তবে ব্যবহারকারীর পাসফ্রেজ
     const e=await encryptJSON(key,{q,t:Date.now()});
-    const arr=JSON.parse(localStorage.sondhan_hist||'[]');arr.unshift(e);localStorage.sondhan_hist=JSON.stringify(arr.slice(0,50));
+    const arr=JSON.parse(localStorage.sandhan_hist||'[]');arr.unshift(e);localStorage.sandhan_hist=JSON.stringify(arr.slice(0,50));
     renderHist();
   }catch(err){console.warn(err);}
 }
-function histArr(){return JSON.parse(localStorage.sondhan_hist||'[]');}
+function histArr(){return JSON.parse(localStorage.sandhan_hist||'[]');}
 function renderHist(){
   document.getElementById('histCount').textContent=histArr().length+'টি এনক্রিপ্টেড এন্ট্রি';
   const box=document.getElementById('hist-list');const arr=histArr();
@@ -719,7 +719,7 @@ async function unlockHist(){
     histUnlocked=true;renderHist();
   }catch(err){alert('ডিক্রিপশন ব্যর্থ — ভুল পাসফ্রেজ।');}
 }
-function clearHist(){localStorage.removeItem('sondhan_hist');histUnlocked=false;renderHist();}
+function clearHist(){localStorage.removeItem('sandhan_hist');histUnlocked=false;renderHist();}
 function openDrawer(){document.getElementById('drawer').classList.add('open');document.getElementById('scrim').classList.add('on');renderHist();}
 function closeDrawer(){document.getElementById('drawer').classList.remove('open');document.getElementById('scrim').classList.remove('on');}
 
@@ -840,7 +840,7 @@ renderHist();
 ---
 
 ### কীভাবে ব্যবহার করবেন
-ফাইলটি `sondhan.html` নামে সেভ করে ব্রাউজারে খুলুন। ট্যাব দিয়ে তিনটি অংশ ঘুরে দেখুন; ডান-উপরের 🌙/☀️ বাটনে থিম বদলায়।
+ফাইলটি `sandhan.html` নামে সেভ করে ব্রাউজারে খুলুন। ট্যাব দিয়ে তিনটি অংশ ঘুরে দেখুন; ডান-উপরের 🌙/☀️ বাটনে থিম বদলায়।
 
 ### 🔐 ক্রিপ্টো স্পেকের মূল কথা (সংক্ষেপে)
 - **কী ডেরিভেশন:** প্রোডাকশনে **Argon2id** (মেমরি-হার্ড, ব্রুট-ফোর্স প্রতিরোধী); ব্রাউজার ডেমোতে WebCrypto-সামঞ্জস্যিক **PBKDF2-SHA256** (২,১০,০০০ ইটারেশন)।
@@ -864,7 +864,7 @@ renderHist();
 ## ফোল্ডার কাঠামো
 
 ```
-sondhan/
+sandhan/
 ├── README.md
 ├── LICENSE                        ← AGPL-3.0 (gnu.org থেকে পূর্ণ টেক্সট নিন)
 ├── Makefile
@@ -900,7 +900,7 @@ sondhan/
 
 ```toml
 [package]
-name = "sondhan-gateway"
+name = "sandhan-gateway"
 version = "0.1.0"
 edition = "2021"
 license = "AGPL-3.0-or-later"
@@ -1025,16 +1025,16 @@ COPY . .
 RUN cargo build --release
 
 FROM debian:bookworm-slim
-COPY --from=build /app/target/release/sondhan-gateway /usr/local/bin/
+COPY --from=build /app/target/release/sandhan-gateway /usr/local/bin/
 EXPOSE 8080
-CMD ["sondhan-gateway"]
+CMD ["sandhan-gateway"]
 ```
 
 ## `apps/web/package.json`
 
 ```json
 {
-  "name": "sondhan-web",
+  "name": "sandhan-web",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -1094,10 +1094,10 @@ const b64 = (u8: Uint8Array) => btoa(String.fromCharCode(...u8));
 const fb64 = (s: string) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
 
 async function getSalt(): Promise<Uint8Array> {
-  let s = localStorage.getItem('sondhan.salt');
+  let s = localStorage.getItem('sandhan.salt');
   if (!s) {
     s = b64(crypto.getRandomValues(new Uint8Array(16)));
-    localStorage.setItem('sondhan.salt', s);
+    localStorage.setItem('sandhan.salt', s);
   }
   return fb64(s);
 }
@@ -1120,14 +1120,14 @@ export async function pushToHistory(query: string, passphrase: string): Promise<
     { name: 'AES-GCM', iv }, key,
     enc.encode(JSON.stringify({ q: query, t: Date.now() }))
   );
-  const arr = JSON.parse(localStorage.getItem('sondhan.history') ?? '[]');
+  const arr = JSON.parse(localStorage.getItem('sandhan.history') ?? '[]');
   arr.unshift({ iv: b64(iv), ct: b64(new Uint8Array(ct)) });
-  localStorage.setItem('sondhan.history', JSON.stringify(arr.slice(0, 100)));
+  localStorage.setItem('sandhan.history', JSON.stringify(arr.slice(0, 100)));
 }
 
 export async function readHistory(passphrase: string): Promise<{ q: string; t: number }[]> {
   const key = await deriveKey(passphrase);
-  const arr = JSON.parse(localStorage.getItem('sondhan.history') ?? '[]');
+  const arr = JSON.parse(localStorage.getItem('sandhan.history') ?? '[]');
   const out: { q: string; t: number }[] = [];
   for (const e of arr) {
     const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: fb64(e.iv) }, key, fb64(e.ct));
@@ -1137,7 +1137,7 @@ export async function readHistory(passphrase: string): Promise<{ q: string; t: n
 }
 
 export function clearHistory(): void {
-  localStorage.removeItem('sondhan.history');
+  localStorage.removeItem('sandhan.history');
 }
 ```
 
@@ -1301,7 +1301,7 @@ services:
     depends_on: [gateway]
 
   # ── ধাপ ১ থেকে সক্রিয় হবে ──
-  # postgres:   { image: postgres:16-alpine, environment: { POSTGRES_DB: sondhan, POSTGRES_PASSWORD: change-me } }
+  # postgres:   { image: postgres:16-alpine, environment: { POSTGRES_DB: sandhan, POSTGRES_PASSWORD: change-me } }
   # redis:      { image: redis:7-alpine }
   # opensearch: { image: opensearchproject/opensearch:2, environment: { discovery.type: single-node } }
 ```
@@ -1374,7 +1374,7 @@ test-api:  ## স্মোক টেস্ট
 
 # ② টেস্ট চেকলিস্ট (যাচাইয়ের জন্য)
 
-> **ডেমো এনক্রিপশন পাসফ্রেজ:** `sondhan-default` (প্রোটোটাইপ এইচটিএমএলে ড্রয়ার আনলকে এটি লিখুন)
+> **ডেমো এনক্রিপশন পাসফ্রেজ:** `sandhan-default` (প্রোটোটাইপ এইচটিএমএলে ড্রয়ার আনলকে এটি লিখুন)
 
 ### ক. সার্চ কোর
 
@@ -1409,9 +1409,9 @@ test-api:  ## স্মোক টেস্ট
 | # | ধাপ | প্রত্যাশিত | ✓ |
 |---|---|---|---|
 | ঘ১ | একটি সার্চ করুন → ড্রয়ার খুলুন | ১টি এন্ট্রি, শুধু সাইফারটেক্সট দৃশ্যমান | ☐ |
-| ঘ২ | DevTools → Application → Local Storage → `sondhan_hist` খুলে কোয়েরির শব্দ খুঁজুন | **প্লেইনটেক্সট পাওয়া যাবে না** | ☐ |
+| ঘ২ | DevTools → Application → Local Storage → `sandhan_hist` খুলে কোয়েরির শব্দ খুঁজুন | **প্লেইনটেক্সট পাওয়া যাবে না** | ☐ |
 | ঘ৩ | ভুল পাসফ্রেজে আনলক | "ডিক্রিপশন ব্যর্থ", ক্র্যাশ নেই | ☐ |
-| ঘ৪ | `sondhan-default` দিয়ে আনলক | সব এন্ট্রি পড়া যায় | ☐ |
+| ঘ৪ | `sandhan-default` দিয়ে আনলক | সব এন্ট্রি পড়া যায় | ☐ |
 | ঘ৫ | ক্রিপ্টো ট্যাব: পাসফ্রেজ `ক` + টেক্সট দিয়ে এনক্রিপ্ট → পাসফ্রেজ `খ` দিয়ে ডিক্রিপ্ট | ব্যর্থ; `ক` দিলে সফল | ☐ |
 | ঘ৬ | সার্চ চলাকালীন Network ট্যাব | ফন্ট ছাড়া কোনো থার্ড-পার্টি রিকোয়েস্ট নেই, কুকি সেট হয়নি | ☐ |
 | ঘ৭ | ড্রয়ারে "মুছুন" | এন্ট্রি সংখ্যা ০, স্টোরেজ খালি | ☐ |
@@ -1504,7 +1504,7 @@ curl -s -X POST localhost:8080/api/history \
 
 ```toml
 [package]
-name = "sondhan-gateway"
+name = "sandhan-gateway"
 version = "0.1.0"
 edition = "2021"
 license = "AGPL-3.0-or-later"
@@ -1677,7 +1677,7 @@ describe('সন্ধান ক্রিপ্টো — এনক্রিপ�
 
   it('স্টোরেজে প্লেইনটেক্সট থাকে না', async () => {
     await pushToHistory('অত্যন্ত গোপনীয় প্রশ্ন', PASS);
-    const raw = localStorage.getItem('sondhan.history') ?? '';
+    const raw = localStorage.getItem('sandhan.history') ?? '';
     expect(raw).not.toContain('অত্যন্ত গোপনীয় প্রশ্ন');
     expect(raw).toContain('"iv"');
     expect(raw).toContain('"ct"');
@@ -1686,29 +1686,29 @@ describe('সন্ধান ক্রিপ্টো — এনক্রিপ�
   it('একই প্রশ্ন দুবার — নন্স আলাদা (রিপ্লে-নিরাপদ)', async () => {
     await pushToHistory('একই প্রশ্ন', PASS);
     await pushToHistory('একই প্রশ্ন', PASS);
-    const arr = JSON.parse(localStorage.getItem('sondhan.history')!);
+    const arr = JSON.parse(localStorage.getItem('sandhan.history')!);
     expect(arr[0].iv).not.toBe(arr[1].iv);
   });
 
   it('সর্বোচ্চ ১০০ এন্ট্রি — পুরনোটা বাদ পড়ে', async () => {
     for (let i = 0; i < 105; i++) await pushToHistory(`q${i}`, PASS);
-    const arr = JSON.parse(localStorage.getItem('sondhan.history')!);
+    const arr = JSON.parse(localStorage.getItem('sandhan.history')!);
     expect(arr).toHaveLength(100);
   });
 
   it('ট্যাম্পারড সাইফারটেক্সট ধরা পড়ে (GCM অথেনটিকেশন)', async () => {
     await pushToHistory('আসল প্রশ্ন', PASS);
-    const arr = JSON.parse(localStorage.getItem('sondhan.history')!);
+    const arr = JSON.parse(localStorage.getItem('sandhan.history')!);
     // শেষ বাইট বদলে দিলাম
     const tampered = arr[0].ct.slice(0, -2) + (arr[0].ct.endsWith('AA') ? 'BB' : 'AA');
-    localStorage.setItem('sondhan.history', JSON.stringify([{ ...arr[0], ct: tampered }]));
+    localStorage.setItem('sandhan.history', JSON.stringify([{ ...arr[0], ct: tampered }]));
     await expect(readHistory(PASS)).rejects.toThrow();
   });
 
   it('clearHistory সব মুছে দেয়', async () => {
     await pushToHistory('কিছু', PASS);
     clearHistory();
-    expect(localStorage.getItem('sondhan.history')).toBeNull();
+    expect(localStorage.getItem('sandhan.history')).toBeNull();
   });
 });
 ```
@@ -1737,7 +1737,7 @@ use std::time::Duration;
 
 const WIKI_API: &str = "https://bn.wikipedia.org/w/api.php";
 const WIKIDATA_API: &str = "https://www.wikidata.org/w/api.php";
-const UA: &str = "sondhan/0.1 (মুক্ত সার্চ; যোগাযোগ: community@sondhan.example)";
+const UA: &str = "sandhan/0.1 (মুক্ত সার্চ; যোগাযোগ: community@sandhan.example)";
 
 pub struct AggResult {
     pub source: &'static str,
@@ -1964,12 +1964,12 @@ curl -s 'http://localhost:8080/api/search?q=রবীন্দ্রনাথ �
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  SONDHAN — Search, in your own hands
+  sandhan — Search, in your own hands
   A free, open-source, privacy-first search engine
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
-**One line.** Sondhan is an AGPL-licensed, self-hostable search engine where user queries are private *by mathematical design* — and where the Bengali-speaking web is a first-class citizen.
+**One line.** sandhan is an AGPL-licensed, self-hostable search engine where user queries are private *by mathematical design* — and where the Bengali-speaking web is a first-class citizen.
 
 **The problem.**
 - Today's dominant engines monetize queries; every search feeds a profiling machine.
@@ -1984,7 +1984,7 @@ curl -s 'http://localhost:8080/api/search?q=রবীন্দ্রনাথ �
 
 **Why we win.**
 
-| Incumbents | Privacy niche | Sondhan |
+| Incumbents | Privacy niche | sandhan |
 |---|---|---|
 | Ad-funded, closed ranking | No logs, but weak UX/index | Zero-knowledge *and* great UX, with a path to a real index |
 | — | US/EU-centric | The world's first Bengali-first privacy engine |
@@ -2004,7 +2004,7 @@ Phase 0 (M0–3): metasearch MVP · Phase 1 (M4–9): own crawler + 100M-page in
 ## B. README Hero (for the repository)
 
 ```markdown
-# Sondhan 🔍
+# sandhan 🔍
 
 **Search, in your own hands.** A free and open-source, privacy-first search engine.
 
@@ -2027,7 +2027,7 @@ cd apps/web && npm i && npm run dev   # UI  → http://localhost:5173
 
 ## C. Community Launch Blurb + Good First Issues
 
-> **Announcing Sondhan — a search engine that can't read your searches.**
+> **Announcing sandhan — a search engine that can't read your searches.**
 > We're building a free, open-source (AGPL), Bengali-first search engine with zero-knowledge encrypted history and transparent ranking. The blueprint, a working prototype, and a Rust + SvelteKit starter are already public. We need: Rust hackers, IR/ML folks, Bengali NLP lovers, translators, and designers. Come build the search layer of a freer internet.
 
 **Good-first-issues তালিকা (রিপোতে ট্যাগ করুন):**
@@ -2130,19 +2130,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: docker/setup-buildx-action@v3
-      - run: docker build -t sondhan-gateway:ci core/gateway
-      - run: docker build -t sondhan-web:ci apps/web
+      - run: docker build -t sandhan-gateway:ci core/gateway
+      - run: docker build -t sandhan-web:ci apps/web
       - name: Trivy — গেটওয়ে ইমেজ
         uses: aquasecurity/trivy-action@0.28.0
         with:
-          image-ref: sondhan-gateway:ci
+          image-ref: sandhan-gateway:ci
           severity: CRITICAL,HIGH
           exit-code: "1"
           ignore-unfixed: true
       - name: Trivy — ওয়েব ইমেজ
         uses: aquasecurity/trivy-action@0.28.0
         with:
-          image-ref: sondhan-web:ci
+          image-ref: sandhan-web:ci
           severity: CRITICAL,HIGH
           exit-code: "1"
           ignore-unfixed: true
@@ -2168,15 +2168,15 @@ jobs:
           context: core/gateway
           push: true
           tags: |
-            ghcr.io/${{ env.OWNER_LC }}/sondhan-gateway:${{ github.ref_name }}
-            ghcr.io/${{ env.OWNER_LC }}/sondhan-gateway:latest
+            ghcr.io/${{ env.OWNER_LC }}/sandhan-gateway:${{ github.ref_name }}
+            ghcr.io/${{ env.OWNER_LC }}/sandhan-gateway:latest
       - uses: docker/build-push-action@v6
         with:
           context: apps/web
           push: true
           tags: |
-            ghcr.io/${{ env.OWNER_LC }}/sondhan-web:${{ github.ref_name }}
-            ghcr.io/${{ env.OWNER_LC }}/sondhan-web:latest
+            ghcr.io/${{ env.OWNER_LC }}/sandhan-web:${{ github.ref_name }}
+            ghcr.io/${{ env.OWNER_LC }}/sandhan-web:latest
 ```
 
 ## `.github/workflows/live.yml` (সাপ্তাহিক লাইভ-নেটওয়ার্ক টেস্ট)
@@ -2202,7 +2202,7 @@ jobs:
 
 **খুচরা কাজ:**
 - `package-lock.json` রিপোতে কমিট করুন (`npm ci`-র জন্য)।
-- রিডমির প্রথম লাইনে ব্যাজ: `![CI](https://github.com/<মালিক>/sondhan/actions/workflows/ci.yml/badge.svg)`
+- রিডমির প্রথম লাইনে ব্যাজ: `![CI](https://github.com/<মালিক>/sandhan/actions/workflows/ci.yml/badge.svg)`
 - ব্রাঞ্চ প্রোটেকশন: `main`-এ পুশের আগে `gateway`, `web`, `docker` জব সবুজ বাধ্যতামূলক করুন।
 
 ---
@@ -2212,7 +2212,7 @@ jobs:
 > নিরাপত্তা অডিটের রেফারেন্স হিসেবে ইংরেজিতে (অডিটরদের সুবিধার্থে), ভূমিকা বাংলায়।
 
 ```markdown
-# Sondhan Threat Model v0.1
+# sandhan Threat Model v0.1
 > নিরাপত্তা অডিটের জন্য প্রামাণ্য ডকুমেন্ট। পরিবর্তনে অবশ্যই সংস্করণ বাড়াবেন।
 
 ## 1. Scope
@@ -2324,7 +2324,7 @@ Aggregate stats published only with differential privacy (ε ≤ 1.0).
 - Quarterly `cargo audit` / `npm audit` / Trivy review (automated in CI).
 
 ## 12. Contact
-security@sondhan.example · PGP fingerprint in `security.txt` ·
+security@sandhan.example · PGP fingerprint in `security.txt` ·
 Disclosure policy: 90 days, credit by default.
 ```
 
@@ -2370,7 +2370,7 @@ Disclosure policy: 90 days, credit by default.
 
 ```toml
 [package]
-name = "sondhan-crawler"
+name = "sandhan-crawler"
 version = "0.1.0"
 edition = "2021"
 license = "AGPL-3.0-or-later"
@@ -2505,7 +2505,7 @@ use std::time::{Duration, Instant};
 use texting_robots::Robot;
 use url::Url;
 
-pub const UA: &str = "sondhan-crawler/0.1 (+https://sondhan.example/bot; মুক্ত সার্চ প্রকল্প)";
+pub const UA: &str = "sandhan-crawler/0.1 (+https://sandhan.example/bot; মুক্ত সার্চ প্রকল্প)";
 
 /// প্রতি ডোমেইনে রোবটস-টেক্সট একবারই আনা হয়; ব্যর্থ হলে ডিফল্ট-অনুমতি।
 pub async fn is_allowed(
@@ -2707,7 +2707,7 @@ volumes:
 
 ```toml
 [package]
-name = "sondhan-indexer"
+name = "sandhan-indexer"
 version = "0.1.0"
 edition = "2021"
 license = "AGPL-3.0-or-later"
@@ -2731,7 +2731,7 @@ use serde_json::{json, Value};
 use std::io::{BufRead, BufReader};
 use tracing::info;
 
-const INDEX: &str = "sondhan_docs";
+const INDEX: &str = "sandhan_docs";
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -2847,7 +2847,7 @@ pub async fn search_index(q: &str) -> Vec<SearchResult> {
         "size": 8,
         "query": { "multi_match": { "query": q, "fields": ["title^3", "text"] } }
     });
-    let Ok(r) = client.post(format!("{base}/sondhan_docs/_search"))
+    let Ok(r) = client.post(format!("{base}/sandhan_docs/_search"))
         .json(&body).send().await else { return vec![] };
     let Ok(resp) = r.json::<Resp>().await else { return vec![] };
 
@@ -2949,7 +2949,7 @@ core/nlp/
 
 ```toml
 [package]
-name = "sondhan-nlp"
+name = "sandhan-nlp"
 version = "0.1.0"
 edition = "2021"
 license = "AGPL-3.0-or-later"
@@ -3231,7 +3231,7 @@ mod tests {
 
 ## গেটওয়েতে ভবিষ্যৎ সংযোগ (ধাপ ১খ)
 
-`core/gateway/Cargo.toml`-এ: `sondhan-nlp = { path = "../nlp" }` — তারপর কয়েরি-পাইপলাইনে `suggest()` দিয়ে **"আপনি কি বোঝাতে চেয়েছেন?"** প্রবাহ। সিআই-তে ক্রলার জবের আদলে `nlp` জব যোগ করুন।
+`core/gateway/Cargo.toml`-এ: `sandhan-nlp = { path = "../nlp" }` — তারপর কয়েরি-পাইপলাইনে `suggest()` দিয়ে **"আপনি কি বোঝাতে চেয়েছেন?"** প্রবাহ। সিআই-তে ক্রলার জবের আদলে `nlp` জব যোগ করুন।
 
 ---
 
@@ -3245,7 +3245,7 @@ mod tests {
 - রুট/সুডো প্রবেশ; ডোমেইন থাকলে ক্লিয়ারনেট টিএলএস পাবেন
 
 ## ১. সার্ভার শক্ত করুন
-    sudo adduser sondhan && sudo usermod -aG sudo sondhan
+    sudo adduser sandhan && sudo usermod -aG sudo sandhan
     # SSH: PasswordAuthentication no, PermitRootLogin no
     sudo systemctl restart ssh
     sudo ufw allow OpenSSH && sudo ufw allow 80/tcp && sudo ufw allow 443/tcp
@@ -3255,16 +3255,16 @@ mod tests {
 
 ## ২. ডকার
     curl -fsSL https://get.docker.com | sh
-    sudo usermod -aG docker sondhan
+    sudo usermod -aG docker sandhan
 
 ## ৩. প্রকল্প নামান
-    git clone https://github.com/<মালিক>/sondhan.git && cd sondhan
+    git clone https://github.com/<মালিক>/sandhan.git && cd sandhan
     git checkout v0.1.0                   # ব্রাঞ্চ নয় — সবসময় ট্যাগ
 
 ## ৪. প্রোডাকশন কম্পোজ — `deploy/docker-compose.prod.yml`
     services:
       gateway:
-        image: ghcr.io/<মালিক>/sondhan-gateway:v0.1.0
+        image: ghcr.io/<মালিক>/sandhan-gateway:v0.1.0
         restart: unless-stopped
         environment:
           RUST_LOG: info
@@ -3274,7 +3274,7 @@ mod tests {
           driver: json-file
           options: { max-size: "10m", max-file: "3" }
       web:
-        image: ghcr.io/<মালিক>/sondhan-web:v0.1.0
+        image: ghcr.io/<মালিক>/sandhan-web:v0.1.0
         restart: unless-stopped
         expose: ["3000"]
         logging: *logs
@@ -3300,7 +3300,7 @@ mod tests {
     volumes: { os-data: {}, caddy-data: {}, caddy-conf: {} }
 
 ## ৫. ক্যাডফাইল — `deploy/Caddyfile`
-    sondhan.example.com {
+    sandhan.example.com {
         header {
             Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
             Content-Security-Policy "default-src 'self'; img-src 'self' data:; connect-src 'self'"
@@ -3333,18 +3333,18 @@ mod tests {
 ## ৬. টর অনিয়ন সার্ভিস
     sudo apt install tor -y
     # /etc/tor/torrc-এ যোগ করুন:
-    HiddenServiceDir /var/lib/tor/sondhan/
+    HiddenServiceDir /var/lib/tor/sandhan/
     HiddenServicePort 80 127.0.0.1:8081
     sudo systemctl restart tor
-    sudo cat /var/lib/tor/sondhan/hostname    # ← আপনার .onion ঠিকানা
+    sudo cat /var/lib/tor/sandhan/hostname    # ← আপনার .onion ঠিকানা
 প্রাপ্ত ঠিকানাটি ক্যাডফাইলের `Onion-Location`-এ বসিয়ে আবার ডিপ্লয় করুন।
 
 ## ৭. চালু ও যাচাই
     docker compose -f deploy/docker-compose.prod.yml up -d
-    curl -s  https://sondhan.example.com/healthz                 # ok
-    curl -sI https://sondhan.example.com | grep -i onion-location
+    curl -s  https://sandhan.example.com/healthz                 # ok
+    curl -sI https://sandhan.example.com | grep -i onion-location
     torsocks curl -s http://<অনিয়ন>.onion/healthz                # টর-পথ যাচাই
-    curl -sG https://sondhan.example.com/api/search --data-urlencode 'q=পরীক্ষা'
+    curl -sG https://sandhan.example.com/api/search --data-urlencode 'q=পরীক্ষা'
 
 ## ৮. রোলব্যাক
 ইমেজ ট্যাগ পিন করা আছে — পুরনো ট্যাগে ফিরতে:
@@ -3396,7 +3396,7 @@ mod tests {
 #           --seeds "u1,u2"    ক্রলের বীজ-ইউআরএল
 #
 #   ওয়ান-লাইনার (রিপো ছাড়া):
-#     curl -fsSL https://raw.githubusercontent.com/<মালিক>/sondhan/main/setup.sh \
+#     curl -fsSL https://raw.githubusercontent.com/<মালিক>/sandhan/main/setup.sh \
 #       -o setup.sh && bash setup.sh
 #=============================================================================
 set -euo pipefail
@@ -3581,7 +3581,7 @@ gather(মূল কয়েরি) ──ফলাফল শূন্য?─�
 ## খ.২) গেটওয়ে ডিপেন্ডেন্সি — `core/gateway/Cargo.toml`
 
 ```toml
-sondhan-nlp = { path = "../nlp" }
+sandhan-nlp = { path = "../nlp" }
 ```
 
 ## খ.৩) `core/gateway/src/spellcheck.rs` (নতুন ফাইল)
@@ -3589,9 +3589,9 @@ sondhan-nlp = { path = "../nlp" }
 ```rust
 //! "আপনি কি বোঝাতে চেয়েছেন?" — সন্ধান-এনএলপি সংযোগ
 //! অভিধান বাইনারিতেই এম্বেড করা (ডকার-বান্ধব); চাইলে ফাইল দিয়ে ওভাররাইড:
-//!   SONDHAN_DICT=/path/bn_dict.txt
+//!   sandhan_DICT=/path/bn_dict.txt
 
-use sondhan_nlp::{tokenize, SpellChecker};
+use sandhan_nlp::{tokenize, SpellChecker};
 use std::sync::OnceLock;
 
 static CHECKER: OnceLock<SpellChecker> = OnceLock::new();
@@ -3599,7 +3599,7 @@ const EMBEDDED_DICT: &str = include_str!("../../nlp/data/bn_dict_sample.txt");
 
 fn checker() -> &'static SpellChecker {
     CHECKER.get_or_init(|| {
-        if let Ok(path) = std::env::var("SONDHAN_DICT") {
+        if let Ok(path) = std::env::var("sandhan_DICT") {
             match SpellChecker::load(&path) {
                 Ok(c) => return c,
                 Err(e) => tracing::warn!(error = %e, "অভিধান ফাইল পড়া যায়নি — এম্বেডেড ব্যবহার হচ্ছে"),
@@ -3734,9 +3734,9 @@ WORKDIR /app/core/gateway
 RUN cargo build --release
 
 FROM debian:bookworm-slim
-COPY --from=build /app/core/gateway/target/release/sondhan-gateway /usr/local/bin/
+COPY --from=build /app/core/gateway/target/release/sandhan-gateway /usr/local/bin/
 EXPOSE 8080
-CMD ["sondhan-gateway"]
+CMD ["sandhan-gateway"]
 ```
 
 ```yaml
@@ -3917,12 +3917,12 @@ brand/
 >
 > আমরা এখনো ছোট — মেটা-সার্চ + ক্রলার-শুরুর ইনডেক্স নিয়ে। বড় ইনডেক্স সময় নেবে; কিন্তু গোপনীয়তার জন্য অপেক্ষা করার কিছু নেই।
 >
-> 🛠️ কোড ও ডক: [রিপো লিংক] · 🧅 অনিয়ন: `…` · 💬 ম্যাট্রিক্স: `#sondhan:matrix.org`
+> 🛠️ কোড ও ডক: [রিপো লিংক] · 🧅 অনিয়ন: `…` · 💬 ম্যাট্রিক্স: `#sandhan:matrix.org`
 > সমালোচনাই আমাদের প্রথম প্রয়োজন — ইস্যু খুলুন, RFC লিখুন, কোড পাঠান।
 
 **ইংরেজি সংস্করণ (এইচএন/লবি-স্টাইল, ছোট):**
 
-> **Sondhan – a search engine that mathematically cannot read your searches.**
+> **sandhan – a search engine that mathematically cannot read your searches.**
 > Open-source (AGPL), Bengali-first, zero-knowledge encrypted history (client-side
 > Argon2id → AES-256-GCM), transparent ranking with user Goggles, metasearch today
 > and an own crawler/index tomorrow. Self-hostable with one script. Early, small,
@@ -3952,7 +3952,7 @@ brand/
   <p class="tag">আপনার ভাষায়, আপনার গোপনীয়তায়।</p>
   <div class="cta">
     <a class="btn" href="/">সার্চ শুরু করুন</a>
-    <a class="btn ghost" href="https://github.com/<মালিক>/sondhan">কোড দেখুন</a>
+    <a class="btn ghost" href="https://github.com/<মালিক>/sandhan">কোড দেখুন</a>
   </div>
   <div class="grid">
     {#each features as [ic, t, d]}
@@ -4053,7 +4053,7 @@ pub async fn index_stats() -> Json<Value> {
     let Ok(client) = reqwest::Client::builder().timeout(Duration::from_secs(3)).build() else {
         return Json(json!({ "available": false }));
     };
-    let Ok(r) = client.get(format!("{base}/sondhan_docs/_stats")).send().await else {
+    let Ok(r) = client.get(format!("{base}/sandhan_docs/_stats")).send().await else {
         return Json(json!({ "available": false }));
     };
     let Ok(v) = r.json::<Value>().await else { return Json(json!({ "available": false })); };
@@ -4489,7 +4489,7 @@ function shareGoggles() {
 import { build, files, version } from '$service-worker';
 
 const sw = self as unknown as ServiceWorkerGlobalScope;
-const CACHE = `sondhan-${version}`;
+const CACHE = `sandhan-${version}`;
 const SHELL = ['/', ...build, ...files]; // অ্যাপ-শেল: অফলাইনে হোম চালানোর জন্য যথেষ্ট
 
 sw.addEventListener('install', (event) => {
@@ -4634,7 +4634,7 @@ struct Doc {
 
 ```toml
 [package]
-name = "sondhan-ranker"
+name = "sandhan-ranker"
 version = "0.1.0"
 edition = "2021"
 license = "AGPL-3.0-or-later"
@@ -4643,7 +4643,7 @@ license = "AGPL-3.0-or-later"
 anyhow = "1"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-sondhan-nlp = { path = "../nlp" }
+sandhan-nlp = { path = "../nlp" }
 tracing = "0.1"
 tracing-subscriber = "0.3"
 url = "2"
@@ -4775,7 +4775,7 @@ fn main() -> anyhow::Result<()> {
         writeln!(enr_out, "{enriched}")?;
 
         // সিউডো-কয়েরি (শিরোনাম থেকে) + তিন-স্তরের লেবেল — ব্যবহারকারীর ডেটা ছাড়াই
-        let q: Vec<String> = sondhan_nlp::remove_stopwords(sondhan_nlp::tokenize(&d.title))
+        let q: Vec<String> = sandhan_nlp::remove_stopwords(sandhan_nlp::tokenize(&d.title))
             .into_iter().take(4).collect();
         if q.is_empty() { continue; }
         let label = if norm_pr > 0.66 { 2 } else if norm_pr > 0.33 { 1 } else { 0 };
@@ -4959,7 +4959,7 @@ print("মডেল সংরক্ষিত → ml/model.txt")
 
 **গ্রহণযোগ্য নয়:** যৌন ভাষা, ট্রলিং, নিপীড়ন, সম্মতি ছাড়া ব্যক্তিগত তথ্য প্রকাশ, অনুমোদনহীন প্রচার।
 
-**প্রয়োগ:** ঘটনা রিপোর্ট → `conduct@sondhan.example` → সতর্কবার্তা → সাময়িক বহিষ্কার → স্থায়ী বহিষ্কার। রিপোর্টকারীর পরিচয় গোপন থাকবে।
+**প্রয়োগ:** ঘটনা রিপোর্ট → `conduct@sandhan.example` → সতর্কবার্তা → সাময়িক বহিষ্কার → স্থায়ী বহিষ্কার। রিপোর্টকারীর পরিচয় গোপন থাকবে।
 
 *(অনুপ্রেরণা: কন্ট্রিবিউটর কোভেন্যান্ট ২.১)*
 ```
@@ -4970,7 +4970,7 @@ print("মডেল সংরক্ষিত → ml/model.txt")
 # নিরাপত্তা
 
 দুর্বলতা পেলে **প্রকাশ্য ইস্যু খুলবেন না**।
-- ইমেইল: `security@sondhan.example` (পিজিপি কী রিপোর রুটে)
+- ইমেইল: `security@sandhan.example` (পিজিপি কী রিপোর রুটে)
 - সাড়া: ৭২ ঘণ্টা · সমাধান-লক্ষ্য: ৯০ দিন · প্রকাশে কৃতিত্ব ডিফল্ট
 - সুযোগ ও থ্রেট মডেল: `docs/THREAT-MODEL.md`
 ```
@@ -5037,14 +5037,14 @@ export const locale = writable<Locale>('bn');
 
 export function initLocale(): void {
   if (typeof window === 'undefined') return;
-  const saved = localStorage.getItem('sondhan.locale') as Locale | null;
+  const saved = localStorage.getItem('sandhan.locale') as Locale | null;
   const detected = navigator.language?.slice(0, 2) as Locale;
   locale.set(saved ?? (LOCALES.some((l) => l.code === detected) ? detected : 'bn'));
 }
 
 export function setLocale(l: Locale): void {
   locale.set(l);
-  localStorage.setItem('sondhan.locale', l);
+  localStorage.setItem('sandhan.locale', l);
 }
 
 /** কি-ভিত্তিক অভিধান; অনুপস্থিত কি বাংলায় ফলব্যাক করে */
@@ -5170,7 +5170,7 @@ describe('আই১৮এন', () => {
   it('ভাষা বদল ও সংরক্ষণ', () => {
     setLocale('hi');
     expect(get(locale)).toBe('hi');
-    expect(localStorage.getItem('sondhan.locale')).toBe('hi');
+    expect(localStorage.getItem('sandhan.locale')).toBe('hi');
   });
 
   it('অনুপস্থিত কি বাংলায় ফলব্যাক করে', () => {
@@ -5186,7 +5186,7 @@ describe('আই১৮এন', () => {
   });
 
   it('ব্রাউজার-ভাষা শনাক্তকরণ (সিমুলেটেড)', () => {
-    localStorage.setItem('sondhan.locale', 'hi');
+    localStorage.setItem('sandhan.locale', 'hi');
     initLocale();
     expect(get(locale)).toBe('hi'); // সংরক্ষিতটাই অগ্রাধিকার
   });
@@ -5367,7 +5367,7 @@ describe('আই১৮এন', () => {
 ## সম্পূর্ণ রিপো মানচিত্র (সব রাউন্ডের সমষ্টি)
 
 ```
-sondhan/                                    [~৬০ ফাইল]
+sandhan/                                    [~৬০ ফাইল]
 ├── README.md · LICENSE(AGPL-3.0) · CHANGELOG.md · Makefile · setup.sh
 ├── SECURITY.md · CODE_OF_CONDUCT.md · CONTRIBUTING.md · docker-compose.yml
 │
@@ -5449,7 +5449,7 @@ sondhan/                                    [~৬০ ফাইল]
 বানান-সংশোধন, ভদ্র ক্রলার থেকে তৈরি পেজর‍্যাংক-সচেতন ইনডেক্স, মেটা-সার্চ,
 গগলস, ড্যাশবোর্ড, পিডাব্লুএ — আর তিন ভাষার ইউআই। সবকিছু এজিপিএল-৩.০।
 
-🚀 শুরু: bash setup.sh          📦 ইমেজ: ghcr.io/<মালিক>/sondhan-*:v0.1.0
+🚀 শুরু: bash setup.sh          📦 ইমেজ: ghcr.io/<মালিক>/sandhan-*:v0.1.0
 🧅 অনিয়ন: <ঠিকানা>             🔐 নিরাপত্তা: SECURITY.md
 
 সৎ সীমাবদ্ধতা: ইনডেক্স এখন বাংলা উইকিপিডিয়া-কেন্দ্রিক; এলটিআর প্রশিক্ষণ
@@ -5458,7 +5458,7 @@ sondhan/                                    [~৬০ ফাইল]
 আপনার সমালোচনাই এই প্রকল্পের জ্বালানি — ইস্যু খুলুন, আরএফসি লিখুন, কোড পাঠান।
 
 —
-English: Sondhan v0.1.0 "First Dawn" — an AGPL, Bengali-first search engine
+English: sandhan v0.1.0 "First Dawn" — an AGPL, Bengali-first search engine
 whose servers mathematically cannot read your searches. Crawler → PageRank
 index → function-score search, metasearch, client-side Goggles, PWA in bn/en/hi.
 ```
@@ -5706,7 +5706,7 @@ export interface SyncState { anon_id: string; salt: string; seq: number }
 export interface HistEntry { q: string; t: number }
 
 export function getLocalState(): SyncState | null {
-  const raw = localStorage.getItem('sondhan.sync');
+  const raw = localStorage.getItem('sandhan.sync');
   return raw ? (JSON.parse(raw) as SyncState) : null;
 }
 
@@ -5728,8 +5728,8 @@ function concat(...arrs: Uint8Array[]): Uint8Array {
 
 /** প্রথম ডিভাইসে সিঙ্ক চালু; রিকভারি কোড একবারই ফেরত যায় */
 export async function enableSync(passphrase: string): Promise<{ state: SyncState; recoveryCode: string }> {
-  const anon = localStorage.getItem('sondhan.anon') ?? b64u(crypto.getRandomValues(new Uint8Array(16)));
-  localStorage.setItem('sondhan.anon', anon);
+  const anon = localStorage.getItem('sandhan.anon') ?? b64u(crypto.getRandomValues(new Uint8Array(16)));
+  localStorage.setItem('sandhan.anon', anon);
   const salt = crypto.getRandomValues(new Uint8Array(16));
   const state: SyncState = { anon_id: anon, salt: b64(salt), seq: 0 };
 
@@ -5741,7 +5741,7 @@ export async function enableSync(passphrase: string): Promise<{ state: SyncState
   const wrapped = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, await rawKey(backup), enc.encode(passphrase));
   await jpost(`${API}/recovery`, { anon_id: anon, nonce: b64(iv), wrapped: b64(new Uint8Array(wrapped)) });
 
-  localStorage.setItem('sondhan.sync', JSON.stringify(state));
+  localStorage.setItem('sandhan.sync', JSON.stringify(state));
   return { state, recoveryCode: 'সন্ধান-রিকভারি-' + b64u(concat(fb64u(anon), backup)) };
 }
 
@@ -5749,9 +5749,9 @@ export async function enableSync(passphrase: string): Promise<{ state: SyncState
 export async function joinSync(anonId: string, passphrase: string): Promise<number> {
   const data = await jget(`${API}/vault?anon_id=${encodeURIComponent(anonId)}`);
   if (data.error) throw new Error('সিঙ্ক আইডি অজানা');
-  localStorage.setItem('sondhan.anon', anonId);
+  localStorage.setItem('sandhan.anon', anonId);
   const state: SyncState = { anon_id: anonId, salt: data.salt, seq: data.seq };
-  localStorage.setItem('sondhan.sync', JSON.stringify(state));
+  localStorage.setItem('sandhan.sync', JSON.stringify(state));
   return mergeFromVault(state, passphrase, data.entries);
 }
 
@@ -5796,7 +5796,7 @@ async function mergeFromVault(state: SyncState, passphrase: string, entries: any
     ver: (histEntry?.ver ?? 0) + 1, ts: Date.now(),
   });
   state.seq = res.server_seq ?? state.seq;
-  localStorage.setItem('sondhan.sync', JSON.stringify(state));
+  localStorage.setItem('sandhan.sync', JSON.stringify(state));
   return merged.length;
 }
 
@@ -5961,7 +5961,7 @@ def search_api(api: str, q: str):
 def search_bm25(os_url: str, q: str):
     """তুলনা-ভিত্তি: বিশুদ্ধ বিএম২৫ মাল্টি-ম্যাচ"""
     body = json.dumps({"size": K, "query": {"multi_match": {"query": q, "fields": ["title^3", "text"]}}}).encode()
-    data = fetch_json(f"{os_url}/sondhan_docs/_search", body)
+    data = fetch_json(f"{os_url}/sandhan_docs/_search", body)
     hits = data["hits"]["hits"]
     return [(h["_source"].get("title", ""), h["_source"].get("text", "")[:200],
              h["_source"].get("url", "")) for h in hits]
@@ -6595,10 +6595,10 @@ axum::serve(listener, app.into_make_service_with_connect_info::<std::net::Socket
 pub async fn prometheus() -> String {
     let s = snapshot();
     format!(
-        "# TYPE sondhan_requests_total counter\nsondhan_requests_total {req}\n\
-         # TYPE sondhan_errors_total counter\nsondhan_errors_total {err}\n\
-         # TYPE sondhan_avg_latency_ms gauge\nsondhan_avg_latency_ms {lat}\n\
-         # TYPE sondhan_uptime_seconds gauge\nsondhan_uptime_seconds {up}\n",
+        "# TYPE sandhan_requests_total counter\nsandhan_requests_total {req}\n\
+         # TYPE sandhan_errors_total counter\nsandhan_errors_total {err}\n\
+         # TYPE sandhan_avg_latency_ms gauge\nsandhan_avg_latency_ms {lat}\n\
+         # TYPE sandhan_uptime_seconds gauge\nsandhan_uptime_seconds {up}\n",
         req = s["requests_total"], err = s["errors_total"],
         lat = s["avg_latency_ms"], up = s["uptime_secs"])
 }
@@ -6609,22 +6609,22 @@ pub async fn prometheus() -> String {
 ```yaml
 # deploy/prometheus.yml
 scrape_configs:
-  - job_name: sondhan
+  - job_name: sandhan
     static_configs: [{ targets: ["gateway:8080"] }]
 rule_files: [alerts.yml]
 
 # deploy/alerts.yml
 groups:
-  - name: sondhan
+  - name: sandhan
     rules:
       - alert: GatewayDown
-        expr: up{job="sondhan"} == 0
+        expr: up{job="sandhan"} == 0
         for: 2m
       - alert: HighErrorRate
-        expr: rate(sondhan_errors_total[5m]) / (rate(sondhan_requests_total[5m]) + 0.001) > 0.05
+        expr: rate(sandhan_errors_total[5m]) / (rate(sandhan_requests_total[5m]) + 0.001) > 0.05
         for: 5m
       - alert: HighLatency
-        expr: sondhan_avg_latency_ms > 500
+        expr: sandhan_avg_latency_ms > 500
         for: 5m
 ```
 
@@ -6646,7 +6646,7 @@ groups:
 # সন্ধান ব্যাকআপ — ইনডেক্স + (সাইফারটেক্সট) স্টোর; প্লেইনটেক্সট কোথাও নেই
 set -euo pipefail
 STAMP=$(date +%F_%H%M)
-DEST="${1:-/var/backups/sondhan}"
+DEST="${1:-/var/backups/sandhan}"
 mkdir -p "$DEST"
 docker compose -f deploy/docker-compose.prod.yml exec -T opensearch \
   tar czf - /usr/share/opensearch/data > "$DEST/opensearch-$STAMP.tar.gz"
@@ -6660,7 +6660,7 @@ echo "✓ ব্যাকআপ সম্পন্ন: $DEST ($STAMP)"
 
 | # | কাজ | যাচাই | ☐ |
 |---|---|---|---|
-| ১ | টিএলএস এ+ রেটিং | `testssl.sh sondhan.example.com` | ☐ |
+| ১ | টিএলএস এ+ রেটিং | `testssl.sh sandhan.example.com` | ☐ |
 | ২ | এইচএসটিএস প্রি-লোড আবেদন | হেডার যাচাই | ☐ |
 | ৩ | রেট-লিমিট | ১০০ দ্রুত রিকোয়েস্ট → ৪২৯ আসে | ☐ |
 | ৪ | `/metrics` স্ক্র্যাপ হচ্ছে | প্রোমেথেস টার্গেট সবুজ | ☐ |

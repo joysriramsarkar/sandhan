@@ -1,4 +1,4 @@
-# সন্ধান হ্যাকাথন — «প্রথম ভোর» (Sondhan Hackathon)
+# সন্ধান হ্যাকাথন — «প্রথম ভোর» (sandhan Hackathon)
 
 Join us in building open-source, privacy-first search infrastructure for hundreds of millions of Bengali speakers and beyond.
 

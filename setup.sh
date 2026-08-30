@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# সন্ধান (Sondhan) Setup Script — Automated Setup
+# সন্ধান (sandhan) Setup Script — Automated Setup
 set -euo pipefail
 
 echo "========================================="
-echo "  সন্ধান (Sondhan) — Search Engine Setup  "
+echo "  সন্ধান (sandhan) — Search Engine Setup  "
 echo "========================================="
 
 echo "[1/3] Checking environment..."

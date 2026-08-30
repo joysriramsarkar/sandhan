@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { t } from '$lib/i18n';
+	import { t, localeStore } from '$lib/i18n';
 	import { resolveBang } from '$lib/bangs';
 	import { getInstantAnswer, type InstantResult } from '$lib/instant';
 	import { executeSearch, type SearchResponse, type SearchResultItem } from '$lib/search';
@@ -12,6 +12,16 @@
 	let instantResult: InstantResult | null = null;
 	let searchResponse: SearchResponse | null = null;
 	let selectedCategory = 'all';
+	let currentPage = 1;
+
+	// Reactive language switcher for searches
+	let lastSearchedLocale = $localeStore;
+	$: if ($localeStore !== lastSearchedLocale) {
+		lastSearchedLocale = $localeStore;
+		if (hasSearched && searchQuery) {
+			performSearch(searchQuery, selectedCategory, 1);
+		}
+	}
 
 	// Goggles Preset
 	let activeGoggle = 'none';
@@ -27,11 +37,13 @@
 		const urlParams = new URLSearchParams(window.location.search);
 		const q = urlParams.get('q');
 		const cat = urlParams.get('cat') || 'all';
+		const p = parseInt(urlParams.get('page') || '1', 10) || 1;
 		selectedCategory = cat;
+		currentPage = p;
 
 		if (q) {
 			searchQuery = q;
-			performSearch(q, cat);
+			performSearch(q, cat, p);
 		}
 
 		window.addEventListener('keydown', handleKeydown);
@@ -46,7 +58,7 @@
 		}
 	}
 
-	async function performSearch(queryToRun?: string, categoryToRun?: string) {
+	async function performSearch(queryToRun?: string, categoryToRun?: string, pageToRun?: number) {
 		const q = (queryToRun || searchQuery).trim();
 		if (!q) return;
 
@@ -58,6 +70,8 @@
 		}
 
 		const cat = categoryToRun || selectedCategory;
+		const page = pageToRun || (queryToRun && queryToRun !== searchQuery ? 1 : currentPage);
+		currentPage = page;
 		selectedCategory = cat;
 		searchQuery = q;
 		isSearching = true;
@@ -68,37 +82,51 @@
 		url.searchParams.set('q', q);
 		if (cat !== 'all') url.searchParams.set('cat', cat);
 		else url.searchParams.delete('cat');
+		if (page > 1) url.searchParams.set('page', page.toString());
+		else url.searchParams.delete('page');
 		window.history.pushState({}, '', url);
 
-		// Instant Answers
-		instantResult = getInstantAnswer(q);
+		// Instant Answers on page 1 only
+		instantResult = page === 1 ? getInstantAnswer(q) : null;
 
-		// Execute Search with Goggles
+		// Execute Search with Goggles & Active Language & Page
 		let dsl = customGoggleDsl;
 		if (activeGoggle === 'academic') dsl = '$boost=3,site=edu\n$boost=2,site=org';
 		if (activeGoggle === 'bengali') dsl = '$boost=3,lang=bn\n$boost=2,site=bangla';
 
-		searchResponse = await executeSearch(q, cat, dsl);
+		searchResponse = await executeSearch(q, cat, dsl, $localeStore, page);
 		isSearching = false;
 
-		// Save to encrypted history
-		saveQueryToEncryptedHistory(q);
+		// Save to encrypted history on first page
+		if (page === 1) {
+			saveQueryToEncryptedHistory(q);
+		}
+	}
+
+	function goToPage(p: number) {
+		if (p < 1 || (searchResponse && p > searchResponse.totalPages)) return;
+		currentPage = p;
+		performSearch(searchQuery, selectedCategory, p);
+		if (typeof window !== 'undefined') {
+			window.scrollTo({ top: 0, behavior: 'smooth' });
+		}
 	}
 
 	function switchCategory(cat: string) {
 		selectedCategory = cat;
+		currentPage = 1;
 		if (hasSearched && searchQuery) {
-			performSearch(searchQuery, cat);
+			performSearch(searchQuery, cat, 1);
 		}
 	}
 
 	async function saveQueryToEncryptedHistory(query: string) {
 		try {
-			const key = await deriveKey('sondhan-default-pass');
+			const key = await deriveKey('sandhan-default-pass');
 			const payload = await encryptJSON(key, { q: query, ts: Date.now() });
-			const existing = JSON.parse(localStorage.getItem('sondhan_history') || '[]');
+			const existing = JSON.parse(localStorage.getItem('sandhan_history') || '[]');
 			existing.unshift(payload);
-			localStorage.setItem('sondhan_history', JSON.stringify(existing.slice(0, 50)));
+			localStorage.setItem('sandhan_history', JSON.stringify(existing.slice(0, 50)));
 		} catch (e) {
 			console.warn('Encrypted history save skipped', e);
 		}
@@ -106,7 +134,15 @@
 
 	function handleQuickSearch(q: string) {
 		searchQuery = q;
-		performSearch(q);
+		currentPage = 1;
+		performSearch(q, selectedCategory, 1);
+	}
+
+	function handleFaviconError(e: Event) {
+		const target = e.currentTarget as HTMLElement | null;
+		if (target) {
+			target.style.display = 'none';
+		}
 	}
 
 	function resetToHome() {
@@ -115,9 +151,11 @@
 		searchResponse = null;
 		instantResult = null;
 		selectedCategory = 'all';
+		currentPage = 1;
 		const url = new URL(window.location.href);
 		url.searchParams.delete('q');
 		url.searchParams.delete('cat');
+		url.searchParams.delete('page');
 		window.history.pushState({}, '', url);
 	}
 </script>
@@ -190,13 +228,15 @@
 			</form>
 		</div>
 
-		<!-- Category Tabs -->
-		<div class="category-bar">
-			<button class="cat-item" class:active={selectedCategory === 'all'} on:click={() => switchCategory('all')}>{t('tabs.all')}</button>
-			<button class="cat-item" class:active={selectedCategory === 'images'} on:click={() => switchCategory('images')}>{t('tabs.images')}</button>
-			<button class="cat-item" class:active={selectedCategory === 'videos'} on:click={() => switchCategory('videos')}>{t('tabs.videos')}</button>
-			<button class="cat-item" class:active={selectedCategory === 'news'} on:click={() => switchCategory('news')}>{t('tabs.news')}</button>
-			<button class="cat-item" class:active={selectedCategory === 'maps'} on:click={() => switchCategory('maps')}>{t('tabs.maps')}</button>
+		<!-- Category Tabs & Goggles Bar -->
+		<div class="category-bar-wrap">
+			<div class="category-scroll">
+				<button class="cat-item" class:active={selectedCategory === 'all'} on:click={() => switchCategory('all')}>{t('tabs.all')}</button>
+				<button class="cat-item" class:active={selectedCategory === 'images'} on:click={() => switchCategory('images')}>{t('tabs.images')}</button>
+				<button class="cat-item" class:active={selectedCategory === 'videos'} on:click={() => switchCategory('videos')}>{t('tabs.videos')}</button>
+				<button class="cat-item" class:active={selectedCategory === 'news'} on:click={() => switchCategory('news')}>{t('tabs.news')}</button>
+				<button class="cat-item" class:active={selectedCategory === 'maps'} on:click={() => switchCategory('maps')}>{t('tabs.maps')}</button>
+			</div>
 
 			<!-- Goggles Selector -->
 			<div class="goggles-selector">
@@ -213,7 +253,7 @@
 		{#if searchResponse?.didYouMean}
 			<div class="did-you-mean-banner">
 				{t('didYouMean')}: 
-				<button class="dym-btn" on:click={() => handleQuickSearch(searchResponse.didYouMean)}>
+				<button class="dym-btn" on:click={() => handleQuickSearch(searchResponse?.didYouMean || '')}>
 					{searchResponse.didYouMean}
 				</button>
 			</div>
@@ -236,7 +276,7 @@
 				<iframe
 					title="OpenStreetMap"
 					width="100%"
-					height="450"
+					height="380"
 					frameborder="0"
 					scrolling="no"
 					marginheight="0"
@@ -284,12 +324,12 @@
 							<div class="result-source">
 								<div class="source-group">
 									{#if item.domain}
-										<img src={`https://icons.duckduckgo.com/ip3/${item.domain}.ico`} alt="" class="site-favicon" on:error={(e) => (e.currentTarget.style.display = 'none')} />
+										<img src={`https://icons.duckduckgo.com/ip3/${item.domain}.ico`} alt="" class="site-favicon" on:error={handleFaviconError} />
 									{/if}
 									<span class="source-tag">{item.domain || item.source}</span>
-									<span class="direct-url-hint">{item.url.slice(0, 55)}{item.url.length > 55 ? '...' : ''}</span>
+									<span class="direct-url-hint">{item.url}</span>
 								</div>
-								<span class="rank-index">#{idx + 1}</span>
+								<span class="rank-index">#{((currentPage - 1) * 10) + idx + 1}</span>
 							</div>
 
 							<h2 class="result-title">
@@ -311,6 +351,39 @@
 							</div>
 						</article>
 					{/each}
+
+					<!-- Multi-page Pagination Controls -->
+					{#if searchResponse && searchResponse.totalPages > 1}
+						<nav class="pagination-nav" aria-label="Pagination">
+							<button
+								class="page-btn prev-btn"
+								disabled={currentPage <= 1}
+								on:click={() => goToPage(currentPage - 1)}
+							>
+								‹ {t('tabs.all') === 'All' ? 'Previous' : 'পূর্ববর্তী'}
+							</button>
+
+							<div class="page-numbers">
+								{#each Array.from({ length: Math.min(10, searchResponse.totalPages) }, (_, i) => i + 1) as p}
+									<button
+										class="page-btn num-btn"
+										class:active={p === currentPage}
+										on:click={() => goToPage(p)}
+									>
+										{p}
+									</button>
+								{/each}
+							</div>
+
+							<button
+								class="page-btn next-btn"
+								disabled={currentPage >= searchResponse.totalPages}
+								on:click={() => goToPage(currentPage + 1)}
+							>
+								{t('tabs.all') === 'All' ? 'Next' : 'পরবর্তী'} ›
+							</button>
+						</nav>
+					{/if}
 				{/if}
 			</div>
 
@@ -383,7 +456,7 @@
 			<h3>🛡️ ছদ্মবেশী ভিউ (Incognito Web View)</h3>
 			<button class="close-btn" on:click={() => incognitoUrl = ''}>✕</button>
 		</div>
-		<p style="font-size: 0.88rem; color: var(--ink-soft); margin-bottom: 12px;">
+		<p style="font-size: 0.85rem; color: var(--ink-soft); margin-bottom: 10px; word-break: break-all;">
 			তৃতীয় পক্ষের ট্র্যাকার ও আইপি ফিঙ্গারপ্রিন্ট ছাড়াই পাতা প্রদর্শন করা হচ্ছে: <code>{incognitoUrl}</code>
 		</p>
 		<div class="proxy-frame-box">
@@ -398,22 +471,25 @@
 		flex-direction: column;
 		align-items: center;
 		text-align: center;
-		padding: 40px 0;
+		padding: 24px 0;
+		width: 100%;
 	}
 	.hero-title {
 		font-family: 'Noto Serif Bengali', serif;
-		font-size: 4.5rem;
+		font-size: clamp(2.8rem, 8vw, 4.5rem);
 		font-weight: 900;
-		letter-spacing: -2px;
+		letter-spacing: -1.5px;
 		background: linear-gradient(135deg, var(--ink) 30%, var(--accent));
 		-webkit-background-clip: text;
+		background-clip: text;
 		-webkit-text-fill-color: transparent;
 	}
 	.hero-subtitle {
-		font-size: 1.2rem;
+		font-size: clamp(1rem, 3.5vw, 1.2rem);
 		color: var(--ink-soft);
-		margin-top: 6px;
-		margin-bottom: 30px;
+		margin-top: 4px;
+		margin-bottom: 24px;
+		word-break: break-word;
 	}
 	.search-box-wrap {
 		width: 100%;
@@ -424,10 +500,11 @@
 		align-items: center;
 		background: var(--bg-elev);
 		border: 2px solid var(--line);
-		border-radius: 18px;
-		padding: 6px 8px 6px 20px;
+		border-radius: 16px;
+		padding: 4px 6px 4px 16px;
 		box-shadow: var(--shadow);
 		transition: all 0.2s ease;
+		width: 100%;
 	}
 	.search-form:focus-within, .serp-search-form:focus-within {
 		border-color: var(--accent);
@@ -435,23 +512,25 @@
 	}
 	.search-form input, .serp-search-form input {
 		flex: 1;
+		min-width: 0;
 		border: none;
 		outline: none;
 		background: transparent;
-		font-size: 1.15rem;
+		font-size: 1.05rem;
 		color: var(--ink);
 		font-family: inherit;
 		padding: 8px 0;
 	}
 	.search-btn {
-		width: 44px;
-		height: 44px;
-		border-radius: 12px;
+		width: 40px;
+		height: 40px;
+		border-radius: 10px;
 		background: var(--accent);
 		color: #fff;
-		font-size: 1.2rem;
+		font-size: 1.1rem;
 		display: grid;
 		place-items: center;
+		flex-shrink: 0;
 		transition: background 0.2s;
 	}
 	.search-btn:hover {
@@ -460,30 +539,31 @@
 	.quick-chips {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 8px;
+		gap: 6px;
 		justify-content: center;
-		margin-top: 20px;
+		margin-top: 18px;
 		max-width: 720px;
+		width: 100%;
 	}
 	.chip {
-		padding: 6px 14px;
-		border-radius: 20px;
+		padding: 5px 12px;
+		border-radius: 16px;
 		background: var(--chip);
 		color: var(--accent);
-		font-size: 0.85rem;
+		font-size: 0.82rem;
 		font-weight: 600;
 		border: 1px solid var(--line);
 		transition: transform 0.15s, background 0.2s;
 	}
 	.chip:hover {
-		transform: translateY(-2px);
+		transform: translateY(-1px);
 		background: var(--bg-soft);
 	}
 	.feature-cards {
 		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-		gap: 20px;
-		margin-top: 50px;
+		grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+		gap: 16px;
+		margin-top: 36px;
 		width: 100%;
 		max-width: 950px;
 		text-align: left;
@@ -491,89 +571,112 @@
 	.card {
 		background: var(--bg-elev);
 		border: 1px solid var(--line);
-		border-radius: 16px;
-		padding: 24px;
+		border-radius: 14px;
+		padding: 18px;
 		box-shadow: var(--shadow);
 	}
 	.card-icon {
-		font-size: 32px;
-		margin-bottom: 12px;
+		font-size: 28px;
+		margin-bottom: 8px;
 	}
 	.card h3 {
 		font-family: 'Noto Serif Bengali', serif;
-		font-size: 1.2rem;
-		margin-bottom: 8px;
+		font-size: 1.15rem;
+		margin-bottom: 6px;
 		color: var(--ink);
 	}
 	.card p {
-		font-size: 0.9rem;
+		font-size: 0.88rem;
 		color: var(--ink-soft);
-		line-height: 1.6;
+		line-height: 1.55;
 	}
 
 	/* SERP Styles */
+	.serp-section {
+		width: 100%;
+		max-width: 100%;
+	}
 	.serp-header {
 		display: flex;
 		align-items: center;
-		gap: 16px;
-		margin-bottom: 16px;
+		gap: 10px;
+		margin-bottom: 14px;
+		flex-wrap: wrap;
 	}
 	.back-home-btn {
-		padding: 10px 16px;
-		border-radius: 12px;
+		padding: 8px 12px;
+		border-radius: 10px;
 		background: var(--bg-elev);
 		border: 1px solid var(--line);
 		font-weight: 600;
 		color: var(--ink);
+		font-size: 0.88rem;
+		flex-shrink: 0;
 	}
 	.serp-search-form {
 		flex: 1;
-		max-width: 640px;
+		min-width: 200px;
 	}
-	.category-bar {
+	.category-bar-wrap {
 		display: flex;
 		align-items: center;
-		gap: 8px;
+		justify-content: space-between;
 		border-bottom: 1px solid var(--line);
-		padding-bottom: 10px;
-		margin-bottom: 20px;
+		padding-bottom: 8px;
+		margin-bottom: 18px;
+		gap: 10px;
 		flex-wrap: wrap;
 	}
+	.category-scroll {
+		display: flex;
+		gap: 4px;
+		overflow-x: auto;
+		-webkit-overflow-scrolling: touch;
+		scrollbar-width: none;
+		max-width: 100%;
+	}
+	.category-scroll::-webkit-scrollbar {
+		display: none;
+	}
 	.cat-item {
-		padding: 6px 14px;
+		padding: 6px 12px;
 		border-radius: 8px;
 		background: transparent;
 		color: var(--ink-soft);
 		font-weight: 600;
-		font-size: 0.92rem;
+		font-size: 0.88rem;
+		white-space: nowrap;
+		flex-shrink: 0;
 	}
 	.cat-item.active {
 		background: var(--bg-soft);
 		color: var(--accent);
 	}
 	.goggles-selector {
-		margin-left: auto;
 		display: flex;
 		align-items: center;
 		gap: 6px;
-		font-size: 0.88rem;
+		font-size: 0.84rem;
 		font-weight: 600;
 		color: var(--ink-soft);
+		flex-shrink: 0;
 	}
 	.goggles-selector select {
-		padding: 6px 10px;
+		padding: 5px 8px;
 		border-radius: 8px;
 		border: 1px solid var(--line);
 		background: var(--bg-elev);
 		color: var(--ink);
 		font-family: inherit;
-		font-size: 0.85rem;
+		font-size: 0.82rem;
+		max-width: 180px;
 	}
 	.did-you-mean-banner {
-		margin-bottom: 18px;
+		margin-bottom: 14px;
 		color: var(--warm);
 		font-weight: 600;
-		font-size: 1rem;
+		font-size: 0.95rem;
+		word-break: break-word;
 	}
 	.dym-btn {
 		background: none;
@@ -581,87 +684,113 @@
 		color: var(--accent);
 		font-weight: 700;
 		text-decoration: underline;
-		font-size: 1rem;
+		font-size: 0.95rem;
 	}
 	.instant-card {
 		background: var(--bg-elev);
 		border: 1.5px solid var(--accent);
-		border-radius: 16px;
-		padding: 20px 24px;
-		margin-bottom: 24px;
+		border-radius: 14px;
+		padding: 16px 18px;
+		margin-bottom: 20px;
 		box-shadow: var(--shadow);
+		word-break: break-word;
 	}
 	.instant-title {
-		font-size: 0.88rem;
+		font-size: 0.82rem;
 		color: var(--ink-soft);
-		margin-bottom: 4px;
+		margin-bottom: 2px;
 	}
 	.instant-value {
 		font-family: 'Outfit', sans-serif;
-		font-size: 2.4rem;
+		font-size: clamp(1.6rem, 5vw, 2.4rem);
 		font-weight: 900;
 		color: var(--accent);
+		line-height: 1.2;
 	}
 	.instant-detail {
-		font-size: 0.95rem;
+		font-size: 0.88rem;
 		color: var(--ink-soft);
 		margin-top: 4px;
 	}
 	.serp-grid {
 		display: grid;
-		grid-template-columns: 1fr 340px;
-		gap: 32px;
+		grid-template-columns: 1fr 320px;
+		gap: 24px;
+		max-width: 100%;
 	}
 	@media (max-width: 860px) {
 		.serp-grid {
 			grid-template-columns: 1fr;
+			gap: 18px;
 		}
 	}
 	.results-col {
 		display: flex;
 		flex-direction: column;
-		gap: 16px;
+		gap: 14px;
+		min-width: 0;
 	}
 	.result-card {
 		background: var(--bg-elev);
 		border: 1px solid var(--line);
-		border-radius: 16px;
-		padding: 20px;
+		border-radius: 14px;
+		padding: 16px;
 		box-shadow: var(--shadow);
-		transition: border-color 0.2s, transform 0.2s;
+		transition: border-color 0.2s;
+		word-break: break-word;
+		overflow-wrap: break-word;
 	}
 	.result-card:hover {
 		border-color: var(--accent);
-		transform: translateY(-2px);
 	}
 	.result-source {
 		display: flex;
+		align-items: center;
 		justify-content: space-between;
-		font-size: 0.82rem;
+		font-size: 0.8rem;
 		font-weight: 600;
 		color: var(--accent);
-		margin-bottom: 8px;
+		margin-bottom: 6px;
+		gap: 8px;
 	}
 	.source-group {
 		display: flex;
 		align-items: center;
-		gap: 8px;
+		gap: 6px;
+		min-width: 0;
+		overflow: hidden;
 	}
 	.site-favicon {
-		width: 16px;
-		height: 16px;
+		width: 15px;
+		height: 15px;
 		border-radius: 3px;
+		flex-shrink: 0;
+	}
+	.source-tag {
+		white-space: nowrap;
+		flex-shrink: 0;
 	}
 	.direct-url-hint {
 		color: var(--ink-faint);
 		font-weight: 400;
-		font-size: 0.78rem;
+		font-size: 0.75rem;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		max-width: clamp(100px, 30vw, 240px);
+	}
+	.rank-index {
+		font-size: 0.75rem;
+		color: var(--ink-faint);
+		flex-shrink: 0;
 	}
 	.result-title {
 		font-family: 'Noto Serif Bengali', serif;
-		font-size: 1.3rem;
+		font-size: clamp(1.1rem, 3.5vw, 1.25rem);
 		font-weight: 700;
-		margin-bottom: 8px;
+		margin-bottom: 6px;
+		line-height: 1.4;
+		word-break: break-word;
 	}
 	.result-title a {
 		color: var(--ink);
@@ -670,130 +799,139 @@
 		color: var(--accent);
 	}
 	.result-snippet {
-		font-size: 0.94rem;
+		font-size: 0.9rem;
 		color: var(--ink-soft);
-		line-height: 1.6;
+		line-height: 1.55;
+		word-break: break-word;
 	}
 	.result-actions {
 		display: flex;
 		align-items: center;
-		gap: 10px;
-		margin-top: 14px;
+		gap: 8px;
+		margin-top: 12px;
+		flex-wrap: wrap;
 	}
 	.why-btn, .incognito-btn {
-		padding: 5px 12px;
+		padding: 4px 10px;
 		border-radius: 6px;
 		background: var(--chip);
 		color: var(--accent);
-		font-size: 0.82rem;
+		font-size: 0.78rem;
 		font-weight: 600;
 	}
 	.visit-link {
-		font-size: 0.82rem;
+		font-size: 0.78rem;
 		font-weight: 600;
 		margin-left: auto;
+		white-space: nowrap;
 	}
 	.sidebar-col {
 		display: flex;
 		flex-direction: column;
-		gap: 16px;
+		gap: 14px;
+		min-width: 0;
 	}
 	.knowledge-card {
 		background: var(--bg-elev);
 		border: 1px solid var(--line);
-		border-radius: 16px;
-		padding: 20px;
+		border-radius: 14px;
+		padding: 16px;
 		box-shadow: var(--shadow);
+		word-break: break-word;
 	}
 	.kp-image {
 		width: 100%;
-		max-height: 200px;
+		max-height: 180px;
 		object-fit: cover;
-		border-radius: 12px;
-		margin-bottom: 14px;
+		border-radius: 10px;
+		margin-bottom: 12px;
 	}
 	.kp-heading {
 		font-family: 'Noto Serif Bengali', serif;
-		font-size: 1.4rem;
+		font-size: 1.25rem;
 		font-weight: 900;
-		margin-bottom: 4px;
+		margin-bottom: 2px;
 	}
 	.kp-sub {
-		font-size: 0.85rem;
+		font-size: 0.82rem;
 		color: var(--accent);
 		font-weight: 600;
-		margin-bottom: 12px;
+		margin-bottom: 10px;
 	}
 	.kp-desc {
-		font-size: 0.92rem;
+		font-size: 0.88rem;
 		color: var(--ink-soft);
-		line-height: 1.6;
-		margin-bottom: 16px;
+		line-height: 1.55;
+		margin-bottom: 14px;
 	}
 	.kp-attributes {
 		border-top: 1px solid var(--line);
-		padding-top: 10px;
+		padding-top: 8px;
 		display: flex;
 		flex-direction: column;
-		gap: 8px;
+		gap: 6px;
 	}
 	.kp-attr-row {
 		display: flex;
 		justify-content: space-between;
-		font-size: 0.85rem;
+		font-size: 0.82rem;
+		gap: 8px;
 	}
-	.attr-key { font-weight: 600; color: var(--ink); }
-	.attr-val { color: var(--ink-soft); }
+	.attr-key { font-weight: 600; color: var(--ink); flex-shrink: 0; }
+	.attr-val { color: var(--ink-soft); text-align: right; word-break: break-word; }
 	.kp-source-link {
 		display: inline-block;
-		margin-top: 14px;
-		font-size: 0.85rem;
+		margin-top: 12px;
+		font-size: 0.82rem;
 		font-weight: 600;
 	}
 	.privacy-guarantee-card {
 		background: var(--chip);
 		border: 1px solid var(--line);
-		border-radius: 14px;
-		padding: 16px;
+		border-radius: 12px;
+		padding: 14px;
 		color: var(--accent);
 	}
 	.privacy-guarantee-card h4 {
-		margin-bottom: 6px;
+		margin-bottom: 4px;
+		font-size: 0.92rem;
 	}
 	.privacy-guarantee-card p {
-		font-size: 0.85rem;
+		font-size: 0.82rem;
 		line-height: 1.5;
 	}
 	.signals-breakdown {
-		margin: 16px 0;
+		margin: 14px 0;
 		display: flex;
 		flex-direction: column;
-		gap: 10px;
+		gap: 8px;
 	}
 	.signal-row {
 		display: flex;
 		justify-content: space-between;
-		font-size: 0.9rem;
+		font-size: 0.85rem;
 		padding: 6px 0;
 		border-bottom: 1px solid var(--line);
+		gap: 8px;
 	}
 	.large-modal {
 		max-width: 800px;
-		width: 95%;
+		width: 94vw;
 		height: 80vh;
 		display: flex;
 		flex-direction: column;
+		padding: 16px;
 	}
 	.modal-top {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		margin-bottom: 10px;
+		margin-bottom: 8px;
 	}
 	.proxy-frame-box {
 		flex: 1;
 		background: #fff;
-		border-radius: 12px;
+		border-radius: 10px;
 		overflow: hidden;
 		border: 1px solid var(--line);
 	}
@@ -804,71 +942,121 @@
 	}
 	.images-grid {
 		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-		gap: 16px;
+		grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+		gap: 10px;
 	}
 	.image-card {
 		background: var(--bg-elev);
 		border: 1px solid var(--line);
-		border-radius: 12px;
+		border-radius: 10px;
 		overflow: hidden;
 		display: flex;
 		flex-direction: column;
 		box-shadow: var(--shadow);
-		transition: transform 0.2s;
-	}
-	.image-card:hover {
-		transform: translateY(-3px);
 	}
 	.image-card img {
 		width: 100%;
-		height: 140px;
+		height: 110px;
 		object-fit: cover;
 	}
 	.img-caption {
-		font-size: 0.85rem;
+		font-size: 0.78rem;
 		font-weight: 600;
-		padding: 8px 10px 2px;
+		padding: 6px 8px 2px;
 		color: var(--ink);
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
 	}
 	.img-domain {
-		font-size: 0.75rem;
+		font-size: 0.7rem;
 		color: var(--ink-faint);
-		padding: 0 10px 8px;
+		padding: 0 8px 6px;
 	}
 	.map-view-box {
 		background: var(--bg-elev);
 		border: 1px solid var(--line);
-		border-radius: 16px;
+		border-radius: 14px;
 		overflow: hidden;
-		margin-bottom: 24px;
+		margin-bottom: 20px;
 		box-shadow: var(--shadow);
 	}
 	.map-footer {
-		padding: 12px 18px;
+		padding: 10px 14px;
 		display: flex;
 		justify-content: space-between;
-		font-size: 0.88rem;
+		font-size: 0.82rem;
 		background: var(--bg-soft);
+		flex-wrap: wrap;
+		gap: 6px;
 	}
 	.loading-state {
 		display: flex;
 		align-items: center;
-		gap: 12px;
-		padding: 30px 0;
+		gap: 10px;
+		padding: 24px 0;
 		color: var(--accent);
 		font-weight: 600;
+		font-size: 0.92rem;
 	}
 	.spinner {
-		width: 24px;
-		height: 24px;
-		border: 3px solid var(--chip);
+		width: 20px;
+		height: 20px;
+		border: 2.5px solid var(--chip);
 		border-top-color: var(--accent);
 		border-radius: 50%;
 		animation: spin 0.8s linear infinite;
+	}
+	.pagination-nav {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 8px;
+		margin-top: 28px;
+		margin-bottom: 20px;
+		flex-wrap: wrap;
+	}
+	.page-numbers {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		flex-wrap: wrap;
+	}
+	.page-btn {
+		padding: 8px 14px;
+		border-radius: 10px;
+		background: var(--bg-elev);
+		border: 1px solid var(--line);
+		color: var(--ink);
+		font-weight: 600;
+		font-size: 0.9rem;
+		transition: all 0.2s ease;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+	}
+	.page-btn:hover:not(:disabled) {
+		background: var(--bg-soft);
+		border-color: var(--accent);
+		transform: translateY(-1px);
+	}
+	.page-btn.active {
+		background: var(--accent);
+		color: var(--accent-ink);
+		border-color: var(--accent);
+		box-shadow: 0 4px 12px rgba(14, 122, 99, 0.25);
+	}
+	.page-btn:disabled {
+		opacity: 0.4;
+		cursor: not-allowed;
+	}
+	.num-btn {
+		min-width: 38px;
+		height: 38px;
+		padding: 0;
+	}
+	.prev-btn, .next-btn {
+		padding: 8px 16px;
 	}
 	@keyframes spin {
 		to { transform: rotate(360deg); }

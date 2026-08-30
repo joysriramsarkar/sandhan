@@ -8,7 +8,7 @@ on:
 
 jobs:
   web:
-    name: "Web · Typecheck + Vitest + Build"
+    name: "Web · Check + Test + Build"
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -17,12 +17,31 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 20
       - run: npm ci || npm install
+      - name: Svelte Check
+        run: npm run check
       - name: Unit Tests (Vitest)
         run: npm test
       - name: Production Build
         run: npm run build
+
+  rust:
+    name: "Rust · Check + Test (Gateway, NLP, Crawler, Indexer)"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Check NLP crate
+        run: cargo check --manifest-path core/nlp/Cargo.toml
+      - name: Check Gateway crate
+        run: cargo check --manifest-path core/gateway/Cargo.toml
+      - name: Check Crawler crate
+        run: cargo check --manifest-path core/crawler/Cargo.toml
+      - name: Check Indexer crate
+        run: cargo check --manifest-path core/indexer/Cargo.toml
+      - name: Test Gateway
+        run: cargo test --manifest-path core/gateway/Cargo.toml
 
   benchmarks:
     name: "NLP & Relevance Benchmarks"

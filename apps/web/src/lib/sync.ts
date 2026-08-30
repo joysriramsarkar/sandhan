@@ -3,7 +3,7 @@
  * Encrypts search records on device and syncs only {anon_id, nonce, ciphertext} to gateway
  */
 
-import { deriveKey, encryptJSON, decryptJSON, type EncryptedPayload } from './crypto';
+import { encryptJSON, decryptJSON, type EncryptedPayload } from './crypto';
 
 export interface SyncRecord {
 	entryId: string;
@@ -19,18 +19,38 @@ export interface EncryptedSyncBlob {
 	nonce: string;
 	ciphertext: string;
 	version: number;
+	authToken?: string;
+}
+
+function generateSecureHex(bytes = 16): string {
+	const u8 = crypto.getRandomValues(new Uint8Array(bytes));
+	return Array.from(u8)
+		.map((b) => b.toString(16).padStart(2, '0'))
+		.join('');
 }
 
 export function generateAnonymousId(): string {
 	if (typeof localStorage !== 'undefined') {
-		let id = localStorage.getItem('sondhan_anon_id');
+		let id = localStorage.getItem('sandhan_anon_id');
 		if (!id) {
-			id = 'anon_' + Math.random().toString(36).substring(2) + Date.now().toString(36);
-			localStorage.setItem('sondhan_anon_id', id);
+			id = 'anon_' + generateSecureHex(16);
+			localStorage.setItem('sandhan_anon_id', id);
 		}
 		return id;
 	}
-	return 'anon_' + Math.random().toString(36).substring(2);
+	return 'anon_' + generateSecureHex(16);
+}
+
+export function getOrCreateSyncAuthToken(): string {
+	if (typeof localStorage !== 'undefined') {
+		let token = localStorage.getItem('sandhan_sync_auth_token');
+		if (!token) {
+			token = 'tok_' + generateSecureHex(24);
+			localStorage.setItem('sandhan_sync_auth_token', token);
+		}
+		return token;
+	}
+	return 'tok_' + generateSecureHex(24);
 }
 
 export async function prepareRecordForSync(
@@ -44,7 +64,8 @@ export async function prepareRecordForSync(
 		entryId: record.entryId,
 		nonce: payload.iv,
 		ciphertext: payload.ct,
-		version: record.version
+		version: record.version,
+		authToken: getOrCreateSyncAuthToken()
 	};
 }
 

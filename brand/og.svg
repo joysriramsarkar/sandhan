@@ -40,7 +40,7 @@
 
   <!-- Title & Headline -->
   <text x="310" y="240" font-family="'Noto Serif Bengali', 'Noto Serif', serif" font-weight="900" font-size="88" fill="#e9efe9" letter-spacing="-1">সন্ধান</text>
-  <text x="310" y="285" font-family="'Noto Sans Bengali', sans-serif" font-weight="600" font-size="24" fill="#2fbf9a" letter-spacing="3">SONDHAN · PRIVACY-FIRST SEARCH</text>
+  <text x="310" y="285" font-family="'Noto Sans Bengali', sans-serif" font-weight="600" font-size="24" fill="#2fbf9a" letter-spacing="3">sandhan · PRIVACY-FIRST SEARCH</text>
 
   <!-- Tagline -->
   <text x="140" y="380" font-family="'Noto Serif Bengali', serif" font-weight="600" font-size="38" fill="#ffffff">খুঁজুন নিশ্চিন্তে — আপনার সার্চ, শুধুই আপনার।</text>

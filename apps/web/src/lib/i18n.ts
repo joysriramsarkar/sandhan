@@ -27,7 +27,7 @@ export const translations = {
 		nav: { search: 'সার্চ', blueprint: 'নীলনকশা', crypto: 'ক্রিপ্টো ল্যাব', judge: 'মানব-রায়', dashboard: 'ড্যাশবোর্ড', design: 'ডিজাইন', launch: 'ঘোষণা' }
 	},
 	en: {
-		appName: 'Sondhan',
+		appName: 'sandhan',
 		tagline: 'Search with confidence — your queries belong solely to you',
 		searchPlaceholder: 'Search… (e.g. Rabindranath Tagore, 25 * 48, !w Bangladesh)',
 		searchBtn: 'Search',
@@ -68,20 +68,32 @@ export const translations = {
 	}
 };
 
-let currentLocale: Locale = 'bn';
+import { writable } from 'svelte/store';
+
+let initialLocale: Locale = 'bn';
+if (typeof localStorage !== 'undefined') {
+	const saved = localStorage.getItem('sandhan_locale') as Locale;
+	if (saved && translations[saved]) {
+		initialLocale = saved;
+	}
+}
+
+let currentLocale: Locale = initialLocale;
+export const localeStore = writable<Locale>(initialLocale);
 
 export function setLocale(locale: Locale): void {
 	if (translations[locale]) {
 		currentLocale = locale;
+		localeStore.set(locale);
 		if (typeof localStorage !== 'undefined') {
-			localStorage.setItem('sondhan_locale', locale);
+			localStorage.setItem('sandhan_locale', locale);
 		}
 	}
 }
 
 export function getLocale(): Locale {
 	if (typeof localStorage !== 'undefined') {
-		const saved = localStorage.getItem('sondhan_locale') as Locale;
+		const saved = localStorage.getItem('sandhan_locale') as Locale;
 		if (saved && translations[saved]) {
 			return saved;
 		}
@@ -104,3 +116,4 @@ export function t(key: string, locale?: Locale): string {
 
 	return typeof current === 'string' ? current : key;
 }
+

@@ -1,4 +1,4 @@
-# Sondhan Search Relevance & NLP Benchmarks
+# sandhan Search Relevance & NLP Benchmarks
 
 This directory contains automated benchmark suites for measuring search relevance (NDCG@5) and Bengali typo correction accuracy.
 

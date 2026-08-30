@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Bengali Spellcheck & Typo Correction Benchmark for Sondhan
+Bengali Spellcheck & Typo Correction Benchmark for sandhan
 Evaluates accuracy on typo pairs and measures false positive rates.
 """
 
@@ -107,7 +107,7 @@ def main():
     ok = 0
     fp = 0
     print("==================================================")
-    print("      সন্ধান (Sondhan) — Typo Benchmark Suite      ")
+    print("      সন্ধান (sandhan) — Typo Benchmark Suite      ")
     print("==================================================")
     
     for p in pairs:

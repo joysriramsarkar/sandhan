@@ -99,3 +99,33 @@ export function applyGoggles(results: SearchResult[], rules: GoggleRule[]): Sear
 	// Rerank descending by new score
 	return transformed.sort((a, b) => b.score - a.score);
 }
+
+/**
+ * Encode goggle DSL rules into a compact URL-safe string
+ */
+export function encodeGoggleUrl(rulesText: string): string {
+	try {
+		return btoa(encodeURIComponent(rulesText.trim()))
+			.replace(/\+/g, '-')
+			.replace(/\//g, '_')
+			.replace(/=+$/, '');
+	} catch (_) {
+		return '';
+	}
+}
+
+/**
+ * Decode a URL-safe goggle string back into DSL rules
+ */
+export function decodeGoggleUrl(encoded: string): string {
+	try {
+		let base64 = encoded.replace(/-/g, '+').replace(/_/g, '/');
+		while (base64.length % 4) {
+			base64 += '=';
+		}
+		return decodeURIComponent(atob(base64));
+	} catch (_) {
+		return '';
+	}
+}
+
