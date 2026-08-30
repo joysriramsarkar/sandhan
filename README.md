@@ -1,11 +1,11 @@
-# সন্ধান (Sondhan) 🔍
+# সন্ধান (Sandhan) 🔍
 
 [![License: CC0-1.0](https://img.shields.io/badge/License-CC0_1.0-blue.svg)](https://creativecommons.org/publicdomain/zero/1.0/)
 [![Privacy: Zero-Knowledge](https://img.shields.io/badge/Privacy-Zero--Knowledge-0e7a63.svg)](docs/THREAT-MODEL.md)
 [![Language: Bengali--First](https://img.shields.io/badge/Language-Bengali--First-e0762f.svg)](apps/web/src/lib/i18n.ts)
 [![Web Search: Universal](https://img.shields.io/badge/Search-Universal_Open_Web-3b82f6.svg)](apps/web/src/routes/api/search/+server.ts)
 
-**সন্ধান (Sondhan)** একটি উন্মুক্ত, সার্বজনীন ও গোপনীয়তা-প্রথম সার্চ ইঞ্জিন। এটি সমগ্র বিশ্বব্রহ্মাণ্ডের কোটি কোটি ওয়েবসাইট, উইকি, ব্লগ ও নিউজ পোর্টাল থেকে তাৎক্ষণিক ফলাফল খুঁজে আনে, ব্যবহারকারীর সার্চ হিস্টরি ক্লায়েন্ট-সাইডে ক্রিপ্টোগ্রাফিকভাবে এনক্রিপ্ট রাখে এবং সম্পূর্ণ স্বচ্ছ র‍্যাংকিং প্রদান করে।
+**সন্ধান (Sandhan)** একটি উন্মুক্ত, সার্বজনীন ও গোপনীয়তা-প্রথম সার্চ ইঞ্জিন। এটি সমগ্র বিশ্বব্রহ্মাণ্ডের কোটি কোটি ওয়েবসাইট, উইকি, ব্লগ ও নিউজ পোর্টাল থেকে তাৎক্ষণিক ফলাফল খুঁজে আনে, ব্যবহারকারীর সার্চ হিস্টরি ক্লায়েন্ট-সাইডে ক্রিপ্টোগ্রাফিকভাবে এনক্রিপ্ট রাখে এবং সম্পূর্ণ স্বচ্ছ র‍্যাংকিং প্রদান করে।
 
 > **Search with complete privacy.** An open-source, universal search engine with Bengali-first multilingual support, zero-knowledge client-side encrypted search history (AES-256-GCM + PBKDF2), transparent ranking with Goggles, instant answers, and live metasearch aggregation across the entire open web.
 
