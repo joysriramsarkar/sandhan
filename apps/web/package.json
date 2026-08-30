@@ -1,8 +1,11 @@
 {
-  "name": "sondhan-web",
+  "name": "sandhan-web",
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "engines": {
+    "node": "20.x"
+  },
   "scripts": {
     "dev": "vite dev --host",
     "build": "vite build",

@@ -7,6 +7,8 @@ pnpm-lock.yaml.bak
 # SvelteKit & Build outputs
 **/.svelte-kit/
 .svelte-kit/
+**/.vercel/
+.vercel/
 **/build/
 build/
 **/dist/
