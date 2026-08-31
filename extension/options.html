@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>সন্ধান এক্সটেনশন সেটিংস (Sandhan Settings)</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <div class="settings-wrap">
+    <header class="settings-header">
+      <div class="logo-box">
+        <div class="logo-badge">স</div>
+        <div>
+          <h1>সন্ধান সেটিংস</h1>
+          <p>ব্রাউজার এক্সটেনশন কনফিগারেশন</p>
+        </div>
+      </div>
+    </header>
+
+    <main class="settings-card">
+      <form id="settingsForm">
+        <!-- Instance URL -->
+        <div class="form-group">
+          <label for="sandhanUrl">সার্চ ইঞ্জিন ইউআরএল (Instance URL)</label>
+          <input
+            type="url"
+            id="sandhanUrl"
+            name="sandhanUrl"
+            placeholder="https://www.sandhan.site"
+            required
+          />
+          <span class="help-text">ডিফল্ট: <code>https://www.sandhan.site</code> অথবা লোকাল <code>http://localhost:5173</code></span>
+        </div>
+
+        <!-- Default Language -->
+        <div class="form-group">
+          <label for="defaultLang">ডিফল্ট অনুসন্ধানের ভাষা</label>
+          <select id="defaultLang" name="defaultLang">
+            <option value="bn">বাংলা (Bengali)</option>
+            <option value="en">English (ইংরেজি)</option>
+            <option value="hi">हिन्दी (Hindi)</option>
+          </select>
+        </div>
+
+        <!-- Open in New Tab -->
+        <div class="form-group checkbox-group">
+          <label class="switch">
+            <input type="checkbox" id="openInNewTab" name="openInNewTab" checked />
+            <span class="slider"></span>
+          </label>
+          <div class="checkbox-label">
+            <strong>নতুন ট্যাবে ফলাফল খুলুন</strong>
+            <span>সার্চ সাবমিট করলে সবসময় নতুন ব্রাউজার ট্যাবে ওপেন হবে।</span>
+          </div>
+        </div>
+
+        <!-- Omnibox Info Box -->
+        <div class="info-box">
+          <h3>💡 অমনিবক্স (অ্যাড্রেস বার) শর্টকাট:</h3>
+          <p>ব্রাউজারের অ্যাড্রেস বারে <code>s</code> চেপে <kbd>Space</kbd> বা <kbd>Tab</kbd> চাপুন, এরপর যা খুঁজতে চান তা লিখে <kbd>Enter</kbd> চাপুন। সরাসরি সন্ধান থেকে ফলাফল দেখতে পাবেন!</p>
+        </div>
+
+        <div class="actions-row">
+          <button type="submit" class="save-btn">💾 সেটিংস সংরক্ষণ করুন</button>
+          <span id="saveStatus" class="save-status"></span>
+        </div>
+      </form>
+    </main>
+
+    <footer class="settings-footer">
+      <p>সন্ধান (Sandhan) · ওপেন সোর্স ও উন্মুক্ত ওয়েব সার্চ ইঞ্জিন · লাইসেন্স: AGPL-3.0</p>
+    </footer>
+  </div>
+
+  <script src="options.js"></script>
+</body>
+</html>

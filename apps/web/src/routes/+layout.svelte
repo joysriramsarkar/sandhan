@@ -1,22 +1,16 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { t, setLocale, getLocale, type Locale } from '$lib/i18n';
-	import { deriveKey, decryptJSON, type EncryptedPayload } from '$lib/crypto';
 
 	let currentTheme = 'light';
 	let currentLocale: Locale = 'bn';
-	let showHistoryDrawer = false;
 	let showShortcutsModal = false;
 	let showMobileMenu = false;
-	let historyPassphrase = '';
-	let historyUnlocked = false;
-	let encryptedHistory: Array<EncryptedPayload & { _pt?: { q: string; ts: number } }> = [];
 
 	onMount(() => {
 		currentTheme = localStorage.getItem('sandhan_theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
 		document.documentElement.dataset.theme = currentTheme;
 		currentLocale = getLocale();
-		loadHistoryFromStorage();
 
 		window.addEventListener('keydown', handleGlobalKeydown);
 		return () => {
@@ -36,63 +30,30 @@
 		location.reload();
 	}
 
-	function loadHistoryFromStorage() {
-		try {
-			encryptedHistory = JSON.parse(localStorage.getItem('sandhan_history') || '[]');
-		} catch (_) {
-			encryptedHistory = [];
-		}
-	}
-
-	async function unlockHistory() {
-		if (!historyPassphrase.trim()) return;
-		try {
-			const key = await deriveKey(historyPassphrase.trim());
-			const updated = [...encryptedHistory];
-			for (const item of updated) {
-				try {
-					item._pt = await decryptJSON<{ q: string; ts: number }>(key, item);
-				} catch (_) {
-					item._pt = undefined;
-				}
-			}
-			encryptedHistory = updated;
-			historyUnlocked = true;
-		} catch (e) {
-			alert('ডিক্রিপশন ব্যর্থ — পাসফ্রেজ সঠিক নয়!');
-		}
-	}
-
-	function clearHistory() {
-		if (confirm('আপনি কি নিশ্চিত যে সম্পূর্ণ এনক্রিপ্টেড ইতিহাস মুছে ফেলতে চান?')) {
-			localStorage.removeItem('sandhan_history');
-			encryptedHistory = [];
-			historyUnlocked = false;
-		}
-	}
-
-	function exportData() {
-		const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(encryptedHistory, null, 2));
-		const dlAnchor = document.createElement('a');
-		dlAnchor.setAttribute('href', dataStr);
-		dlAnchor.setAttribute('download', `sandhan-encrypted-vault-${new Date().toISOString().slice(0, 10)}.json`);
-		dlAnchor.click();
-	}
-
-
 	function handleGlobalKeydown(e: KeyboardEvent) {
-		if (e.key === '?' && !['INPUT', 'TEXTAREA'].includes((document.activeElement as HTMLElement)?.tagName)) {
+		const targetTag = (document.activeElement as HTMLElement)?.tagName;
+		const isEditable = (document.activeElement as HTMLElement)?.isContentEditable;
+		if (['INPUT', 'TEXTAREA', 'SELECT'].includes(targetTag) || isEditable) {
+			if (e.key === 'Escape') {
+				(document.activeElement as HTMLElement)?.blur();
+			}
+			return;
+		}
+		if (e.key === '?' && !e.ctrlKey && !e.metaKey && !e.altKey) {
 			e.preventDefault();
 			showShortcutsModal = !showShortcutsModal;
 		}
-		if (e.key === 'd' && !['INPUT', 'TEXTAREA'].includes((document.activeElement as HTMLElement)?.tagName)) {
-			e.preventDefault();
-			toggleTheme();
-		}
 		if (e.key === 'Escape') {
-			showHistoryDrawer = false;
 			showShortcutsModal = false;
 			showMobileMenu = false;
+		}
+	}
+
+	function handleLogoClick(e: MouseEvent) {
+		showMobileMenu = false;
+		window.dispatchEvent(new CustomEvent('sandhan:reset-home'));
+		if (window.location.pathname === '/' || window.location.pathname === '') {
+			window.history.pushState({}, '', '/');
 		}
 	}
 </script>
@@ -103,7 +64,7 @@
 
 <header>
 	<div class="header-bar">
-		<a href="/" class="brand-logo" on:click={() => showMobileMenu = false}>
+		<a href="/" class="brand-logo" on:click={handleLogoClick}>
 			<span class="logo-badge">স</span>
 			<span class="logo-text">{t('appName')}</span>
 		</a>
@@ -112,8 +73,6 @@
 		<nav class="desktop-nav">
 			<a href="/" class="nav-item">{t('nav.search')}</a>
 			<a href="/dashboard" class="nav-item">{t('nav.dashboard')}</a>
-			<a href="/judge" class="nav-item">{t('nav.judge')}</a>
-			<a href="/design" class="nav-item">{t('nav.design')}</a>
 			<a href="/launch" class="nav-item">{t('nav.launch')}</a>
 		</nav>
 
@@ -125,11 +84,6 @@
 				<button class="lang-btn" class:active={currentLocale === 'en'} on:click={() => handleLocaleChange('en')}>EN</button>
 				<button class="lang-btn" class:active={currentLocale === 'hi'} on:click={() => handleLocaleChange('hi')}>हिन्दी</button>
 			</div>
-
-			<!-- History Button -->
-			<button class="action-btn history-trigger" on:click={() => { showHistoryDrawer = true; loadHistoryFromStorage(); }} title="এনক্রিপ্টেড ইতিহাস">
-				🔒 <span class="btn-text">{t('historyTitle')}</span>
-			</button>
 
 			<!-- Theme Toggle Button -->
 			<button class="action-btn theme-toggle" on:click={toggleTheme} title="থিম বদল (d)">
@@ -148,8 +102,6 @@
 		<nav class="mobile-nav">
 			<a href="/" class="mobile-nav-item" on:click={() => showMobileMenu = false}>🔍 {t('nav.search')}</a>
 			<a href="/dashboard" class="mobile-nav-item" on:click={() => showMobileMenu = false}>📊 {t('nav.dashboard')}</a>
-			<a href="/judge" class="mobile-nav-item" on:click={() => showMobileMenu = false}>⚖️ {t('nav.judge')}</a>
-			<a href="/design" class="mobile-nav-item" on:click={() => showMobileMenu = false}>🎨 {t('nav.design')}</a>
 			<a href="/launch" class="mobile-nav-item" on:click={() => showMobileMenu = false}>🚀 {t('nav.launch')}</a>
 		</nav>
 	{/if}
@@ -158,52 +110,6 @@
 <main>
 	<slot />
 </main>
-
-<!-- Encrypted History Drawer -->
-{#if showHistoryDrawer}
-	<div class="scrim" on:click={() => showHistoryDrawer = false} role="presentation"></div>
-	<aside class="drawer">
-		<div class="drawer-header">
-			<h3>🔒 {t('historyTitle')}</h3>
-			<button class="close-btn" on:click={() => showHistoryDrawer = false}>✕</button>
-		</div>
-		<p class="drawer-desc">{t('historyDesc')}</p>
-
-		<div class="unlock-box">
-			<input type="password" bind:value={historyPassphrase} placeholder="পাসফ্রেজ লিখুন..." />
-			<button class="primary-btn" on:click={unlockHistory}>{t('unlock')}</button>
-		</div>
-
-		<div class="history-list">
-			{#if encryptedHistory.length === 0}
-				<p class="empty-state">{t('noHistory')}</p>
-			{:else}
-				{#each encryptedHistory as item, i}
-					<div class="history-card">
-						<div class="card-meta">
-							<span>এন্ট্রি #{i + 1}</span>
-							<span class="enc-tag">AES-256-GCM</span>
-						</div>
-						{#if historyUnlocked && item._pt}
-							<div class="plain-query">🔓 {item._pt.q}</div>
-							<div class="timestamp">{new Date(item._pt.ts).toLocaleTimeString()}</div>
-						{:else}
-							<div class="cipher-blob">
-								<small>IV: {item.iv}</small>
-								<div class="ct-snippet">{item.ct.slice(0, 32)}...</div>
-							</div>
-						{/if}
-					</div>
-				{/each}
-			{/if}
-		</div>
-
-		<div class="drawer-actions-row">
-			<button class="export-btn" on:click={exportData}>📥 ডেটা এক্সপোর্ট (JSON)</button>
-			<button class="danger-btn" on:click={clearHistory}>🗑️ {t('clear')}</button>
-		</div>
-	</aside>
-{/if}
 
 <!-- Shortcuts Modal -->
 {#if showShortcutsModal}
@@ -214,7 +120,7 @@
 			<div><code>/</code> <span>সার্চ বক্সে ফোকাস</span></div>
 			<div><code>d</code> <span>ডার্ক / লাইট থিম টগল</span></div>
 			<div><code>?</code> <span>এই সাহায্য পপআপ খোলা</span></div>
-			<div><code>Esc</code> <span>ড্রয়ার / মোডাল বন্ধ করা</span></div>
+			<div><code>Esc</code> <span>মোডাল বন্ধ করা</span></div>
 			<div><code>Enter</code> <span>অনুসন্ধান চালু</span></div>
 		</div>
 		<button class="primary-btn full-btn" on:click={() => showShortcutsModal = false}>ঠিক আছে</button>
@@ -290,66 +196,64 @@
 		backdrop-filter: blur(12px);
 		-webkit-backdrop-filter: blur(12px);
 		border-bottom: 1px solid var(--line);
-		width: 100%;
 	}
 	.header-bar {
-		max-width: 1100px;
+		max-width: 1200px;
 		margin: 0 auto;
+		padding: 10px 16px;
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		padding: 10px 16px;
-		gap: 10px;
+		gap: 12px;
 	}
 	.brand-logo {
 		display: flex;
 		align-items: center;
-		gap: 8px;
-		font-family: 'Noto Serif Bengali', serif;
-		font-weight: 900;
-		font-size: 1.35rem;
+		gap: 10px;
 		color: var(--ink);
-		flex-shrink: 0;
+		font-weight: 800;
+		font-size: 1.25rem;
 	}
 	.logo-badge {
-		width: 34px;
-		height: 34px;
-		border-radius: 9px;
-		background: linear-gradient(135deg, var(--accent), var(--warm));
-		color: #fff;
-		display: grid;
-		place-items: center;
-		font-size: 1.15rem;
-		box-shadow: 0 4px 12px rgba(14, 122, 99, 0.25);
+		width: 32px;
+		height: 32px;
+		border-radius: 8px;
+		background: var(--accent);
+		color: var(--accent-ink);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-family: 'Noto Serif Bengali', serif;
+		font-size: 1.2rem;
+		font-weight: 700;
 		flex-shrink: 0;
 	}
+	.logo-text {
+		font-family: 'Noto Serif Bengali', serif;
+	}
+
 	.desktop-nav {
 		display: flex;
 		align-items: center;
 		gap: 6px;
 	}
-	@media (max-width: 820px) {
-		.desktop-nav {
-			display: none;
-		}
-	}
 	.nav-item {
-		padding: 6px 10px;
+		padding: 6px 12px;
 		border-radius: 8px;
 		color: var(--ink-soft);
 		font-weight: 600;
-		font-size: 0.9rem;
-		transition: all 0.2s;
+		font-size: 0.92rem;
+		transition: all 0.2s ease;
 	}
 	.nav-item:hover {
 		background: var(--bg-soft);
-		color: var(--ink);
+		color: var(--accent);
 	}
+
 	.header-actions {
 		display: flex;
 		align-items: center;
-		gap: 6px;
-		flex-shrink: 0;
+		gap: 8px;
 	}
 	.lang-picker {
 		display: flex;
@@ -357,225 +261,113 @@
 		border: 1px solid var(--line);
 		border-radius: 8px;
 		padding: 2px;
+		gap: 2px;
 	}
 	.lang-btn {
-		padding: 4px 6px;
+		padding: 4px 8px;
 		border-radius: 6px;
 		background: transparent;
-		color: var(--ink-soft);
-		font-size: 0.75rem;
+		font-size: 0.78rem;
 		font-weight: 600;
+		color: var(--ink-soft);
+		transition: all 0.2s ease;
 	}
 	.lang-btn.active {
 		background: var(--bg-elev);
 		color: var(--accent);
-		box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+		box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
 	}
+
 	.action-btn {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		padding: 6px 12px;
+		border-radius: 8px;
+		background: var(--bg-elev);
+		border: 1px solid var(--line);
+		color: var(--ink);
+		font-size: 0.85rem;
+		font-weight: 600;
+		transition: all 0.2s ease;
+	}
+	.action-btn:hover {
+		border-color: var(--accent);
+		color: var(--accent);
+	}
+	.theme-toggle {
+		padding: 6px 10px;
+		font-size: 1rem;
+	}
+
+	.mobile-menu-btn {
+		display: none;
 		padding: 6px 10px;
 		border-radius: 8px;
 		background: var(--bg-elev);
 		border: 1px solid var(--line);
 		color: var(--ink);
-		font-weight: 600;
-		font-size: 0.84rem;
-		display: flex;
-		align-items: center;
-		gap: 4px;
-		transition: all 0.2s;
-		min-height: 34px;
-	}
-	.action-btn:hover {
-		background: var(--bg-soft);
-	}
-	@media (max-width: 600px) {
-		.history-trigger .btn-text {
-			display: none;
-		}
-		.action-btn {
-			padding: 6px 8px;
-		}
-	}
-	.mobile-menu-btn {
-		display: none;
-		width: 34px;
-		height: 34px;
-		border-radius: 8px;
-		background: var(--bg-elev);
-		border: 1px solid var(--line);
-		color: var(--ink);
 		font-size: 1.1rem;
-		font-weight: bold;
-		place-items: center;
 	}
-	@media (max-width: 820px) {
-		.mobile-menu-btn {
-			display: grid;
-		}
-	}
+
 	.mobile-nav {
-		display: flex;
+		display: none;
 		flex-direction: column;
+		padding: 10px 16px 16px;
 		background: var(--bg-elev);
 		border-bottom: 1px solid var(--line);
-		padding: 10px 16px;
-		gap: 4px;
-		animation: slideDown 0.2s ease-out;
-	}
-	@keyframes slideDown {
-		from { opacity: 0; transform: translateY(-8px); }
-		to { opacity: 1; transform: translateY(0); }
+		gap: 6px;
 	}
 	.mobile-nav-item {
 		padding: 10px 12px;
 		border-radius: 8px;
+		background: var(--bg-soft);
 		color: var(--ink);
 		font-weight: 600;
 		font-size: 0.95rem;
-		display: flex;
-		align-items: center;
-		gap: 8px;
 	}
-	.mobile-nav-item:hover {
-		background: var(--bg-soft);
+
+	@media (max-width: 768px) {
+		.desktop-nav { display: none; }
+		.mobile-menu-btn { display: flex; align-items: center; justify-content: center; }
+		.mobile-nav { display: flex; }
 	}
 
 	main {
-		max-width: 1100px;
+		flex: 1;
+		max-width: 1200px;
 		width: 100%;
 		margin: 0 auto;
-		padding: 24px 16px 60px;
-		flex: 1;
+		padding: 24px 16px;
 	}
-	@media (max-width: 600px) {
-		main {
-			padding: 16px 12px 40px;
-		}
-	}
+
 	footer {
 		border-top: 1px solid var(--line);
-		padding: 20px 16px;
+		padding: 24px 16px;
 		text-align: center;
-		background: var(--bg-soft);
 		color: var(--ink-soft);
-		font-size: 0.85rem;
-		word-break: break-word;
+		font-size: 0.88rem;
+		margin-top: auto;
 	}
-	.footer-content p {
-		margin-bottom: 4px;
+	.footer-content {
+		max-width: 800px;
+		margin: 0 auto;
+		display: flex;
+		flex-direction: column;
+		gap: 6px;
 	}
+	.footer-content small {
+		color: var(--ink-faint);
+		font-size: 0.78rem;
+	}
+
+	/* Modal Backdrop & Modal Box */
 	.scrim {
 		position: fixed;
 		inset: 0;
-		background: rgba(0,0,0,0.5);
-		z-index: 90;
-	}
-	.drawer {
-		position: fixed;
-		top: 0;
-		right: 0;
-		width: 380px;
-		max-width: 90vw;
-		height: 100vh;
-		background: var(--bg-elev);
-		border-left: 1px solid var(--line);
-		z-index: 100;
-		padding: 20px;
-		display: flex;
-		flex-direction: column;
-		box-shadow: -10px 0 30px rgba(0,0,0,0.2);
-	}
-	.drawer-header {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		margin-bottom: 10px;
-	}
-	.drawer-desc {
-		font-size: 0.84rem;
-		color: var(--ink-soft);
-		margin-bottom: 14px;
-	}
-	.unlock-box {
-		display: flex;
-		gap: 8px;
-		margin-bottom: 14px;
-	}
-	.unlock-box input {
-		flex: 1;
-		padding: 8px 10px;
-		border-radius: 8px;
-		border: 1px solid var(--line);
-		background: var(--bg);
-		color: var(--ink);
-		font-size: 0.9rem;
-	}
-	.primary-btn {
-		padding: 8px 14px;
-		border-radius: 8px;
-		background: var(--accent);
-		color: var(--accent-ink);
-		font-weight: 600;
-		font-size: 0.88rem;
-		white-space: nowrap;
-	}
-	.drawer-actions-row {
-		display: flex;
-		gap: 8px;
-		margin-top: 10px;
-	}
-	.export-btn {
-		flex: 1;
-		padding: 10px;
-		border-radius: 8px;
-		background: var(--bg-soft);
-		border: 1px solid var(--line);
-		color: var(--ink);
-		font-weight: 600;
-		font-size: 0.84rem;
-	}
-	.danger-btn {
-		padding: 10px 14px;
-		border-radius: 8px;
-		background: var(--bg-soft);
-		color: #e63946;
-		font-weight: 600;
-		font-size: 0.84rem;
-	}
-	.history-list {
-		flex: 1;
-		overflow-y: auto;
-		display: flex;
-		flex-direction: column;
-		gap: 10px;
-	}
-	.history-card {
-		background: var(--bg);
-		border: 1px solid var(--line);
-		border-radius: 10px;
-		padding: 10px;
-	}
-	.card-meta {
-		display: flex;
-		justify-content: space-between;
-		font-size: 0.72rem;
-		color: var(--ink-soft);
-		margin-bottom: 4px;
-	}
-	.enc-tag {
-		color: var(--accent);
-		font-weight: 600;
-	}
-	.ct-snippet {
-		font-family: 'IBM Plex Mono', monospace;
-		font-size: 0.75rem;
-		color: var(--accent);
-		word-break: break-all;
-	}
-	.plain-query {
-		font-size: 0.9rem;
-		font-weight: 600;
-		color: var(--ink);
+		background: rgba(0, 0, 0, 0.45);
+		backdrop-filter: blur(4px);
+		z-index: 50;
 	}
 	.modal {
 		position: fixed;
@@ -585,35 +377,51 @@
 		background: var(--bg-elev);
 		border: 1px solid var(--line);
 		border-radius: 16px;
-		padding: 20px;
-		z-index: 100;
+		padding: 24px;
+		width: 90%;
 		max-width: 440px;
-		width: 90vw;
-		box-shadow: var(--shadow);
-		max-height: 85vh;
-		overflow-y: auto;
+		box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+		z-index: 60;
+	}
+	.modal h3 {
+		font-size: 1.15rem;
+		font-weight: 700;
+		margin-bottom: 16px;
+		color: var(--ink);
 	}
 	.shortcuts-grid {
-		display: grid;
+		display: flex;
+		flex-direction: column;
 		gap: 10px;
-		margin: 14px 0;
+		margin-bottom: 20px;
 	}
 	.shortcuts-grid div {
 		display: flex;
 		align-items: center;
-		gap: 10px;
-		font-size: 0.88rem;
+		justify-content: space-between;
+		font-size: 0.9rem;
 	}
 	.shortcuts-grid code {
-		padding: 3px 6px;
-		border-radius: 6px;
+		padding: 3px 8px;
 		background: var(--chip);
+		border-radius: 6px;
+		font-family: monospace;
+		font-weight: 700;
 		color: var(--accent);
-		font-family: 'IBM Plex Mono', monospace;
-		font-size: 0.82rem;
+	}
+	.primary-btn {
+		padding: 10px 16px;
+		background: var(--accent);
+		color: #ffffff;
+		border-radius: 10px;
+		font-weight: 700;
+		font-size: 0.92rem;
+		transition: background 0.15s;
+	}
+	.primary-btn:hover {
+		background: var(--accent-hover);
 	}
 	.full-btn {
 		width: 100%;
-		margin-top: 10px;
 	}
 </style>

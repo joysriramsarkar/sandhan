@@ -1,0 +1,49 @@
+{
+  "manifest_version": 3,
+  "name": "সন্ধান — উন্মুক্ত সার্চ ইঞ্জিন (Sandhan Search)",
+  "short_name": "Sandhan",
+  "version": "1.0.0",
+  "description": "সন্ধান (Sandhan) উন্মুক্ত ও স্বাধীন সার্চ ইঞ্জিন। অমনিবক্স শর্টকাট (s + Space), দ্রুত পপআপ সার্চ ও রাইট-ক্লিক মেনু।",
+  "icons": {
+    "16": "icons/icon-16.png",
+    "32": "icons/icon-32.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "সন্ধানে অনুসন্ধান করুন (Sandhan Search)",
+    "default_icon": {
+      "16": "icons/icon-16.png",
+      "32": "icons/icon-32.png",
+      "48": "icons/icon-48.png",
+      "128": "icons/icon-128.png"
+    }
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "omnibox": {
+    "keyword": "s"
+  },
+  "permissions": [
+    "contextMenus",
+    "storage",
+    "activeTab"
+  ],
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": true
+  },
+  "chrome_settings_overrides": {
+    "search_provider": {
+      "name": "সন্ধান (Sandhan Search)",
+      "keyword": "s",
+      "search_url": "https://www.sandhan.site/?q={searchTerms}",
+      "favicon_url": "https://www.sandhan.site/favicon.ico",
+      "suggest_url": "https://www.sandhan.site/api/search?q={searchTerms}",
+      "is_default": false,
+      "encoding": "UTF-8"
+    }
+  }
+}

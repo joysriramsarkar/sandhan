@@ -4,7 +4,7 @@
 	import { resolveBang } from '$lib/bangs';
 	import { getInstantAnswer, type InstantResult } from '$lib/instant';
 	import { executeSearch, type SearchResponse, type SearchResultItem } from '$lib/search';
-	import { deriveKey, encryptJSON } from '$lib/crypto';
+	import { isQuestionQuery, fetchAiOverview, type AiAnswerResponse } from '$lib/ai';
 
 	let searchQuery = '';
 	let isSearching = false;
@@ -13,6 +13,13 @@
 	let searchResponse: SearchResponse | null = null;
 	let selectedCategory = 'all';
 	let currentPage = 1;
+
+	// AI Mode & Overview State
+	let isAiMode = false;
+	let aiOverview: AiAnswerResponse | null = null;
+	let isAiLoading = false;
+	let isAiCollapsed = false;
+	let copiedAi = false;
 
 	// Reactive language switcher for searches
 	let lastSearchedLocale = $localeStore;
@@ -38,6 +45,11 @@
 		const q = urlParams.get('q');
 		const cat = urlParams.get('cat') || 'all';
 		const p = parseInt(urlParams.get('page') || '1', 10) || 1;
+		const aiParam = urlParams.get('ai');
+		if (aiParam === '1' || aiParam === 'true') {
+			isAiMode = true;
+		}
+
 		selectedCategory = cat;
 		currentPage = p;
 
@@ -47,14 +59,22 @@
 		}
 
 		window.addEventListener('keydown', handleKeydown);
-		return () => window.removeEventListener('keydown', handleKeydown);
+		window.addEventListener('sandhan:reset-home', resetToHome);
+		return () => {
+			window.removeEventListener('keydown', handleKeydown);
+			window.removeEventListener('sandhan:reset-home', resetToHome);
+		};
 	});
 
 	function handleKeydown(e: KeyboardEvent) {
-		if (e.key === '/' && !['INPUT', 'TEXTAREA'].includes((document.activeElement as HTMLElement)?.tagName)) {
+		const targetTag = (document.activeElement as HTMLElement)?.tagName;
+		const isEditable = (document.activeElement as HTMLElement)?.isContentEditable;
+		if (['INPUT', 'TEXTAREA', 'SELECT'].includes(targetTag) || isEditable) {
+			return;
+		}
+		if (e.key === '/' && !e.ctrlKey && !e.metaKey && !e.altKey) {
 			e.preventDefault();
 			searchInputEl?.focus();
-			searchInputEl?.select();
 		}
 	}
 
@@ -84,6 +104,8 @@
 		else url.searchParams.delete('cat');
 		if (page > 1) url.searchParams.set('page', page.toString());
 		else url.searchParams.delete('page');
+		if (isAiMode) url.searchParams.set('ai', '1');
+		else url.searchParams.delete('ai');
 		window.history.pushState({}, '', url);
 
 		// Instant Answers on page 1 only
@@ -94,13 +116,66 @@
 		if (activeGoggle === 'academic') dsl = '$boost=3,site=edu\n$boost=2,site=org';
 		if (activeGoggle === 'bengali') dsl = '$boost=3,lang=bn\n$boost=2,site=bangla';
 
+		// Trigger AI Overview asynchronously on page 1 for questions or AI mode
+		const shouldTriggerAi = page === 1 && (isQuestionQuery(q, $localeStore) || isAiMode);
+		if (shouldTriggerAi) {
+			isAiLoading = true;
+			aiOverview = null;
+		} else {
+			aiOverview = null;
+			isAiLoading = false;
+		}
+
 		searchResponse = await executeSearch(q, cat, dsl, $localeStore, page);
 		isSearching = false;
 
-		// Save to encrypted history on first page
-		if (page === 1) {
-			saveQueryToEncryptedHistory(q);
+		// If AI was triggered, synthesize using the fresh search results & knowledge
+		if (shouldTriggerAi) {
+			fetchAiOverview(q, $localeStore, searchResponse?.results || [], searchResponse?.knowledge)
+				.then((res) => {
+					aiOverview = res;
+					isAiLoading = false;
+				})
+				.catch(() => {
+					isAiLoading = false;
+				});
 		}
+	}
+
+	function toggleAiMode() {
+		isAiMode = !isAiMode;
+		if (hasSearched && searchQuery && isAiMode && !aiOverview && currentPage === 1) {
+			isAiLoading = true;
+			fetchAiOverview(searchQuery, $localeStore, searchResponse?.results || [], searchResponse?.knowledge)
+				.then((res) => {
+					aiOverview = res;
+					isAiLoading = false;
+				})
+				.catch(() => {
+					isAiLoading = false;
+				});
+		}
+	}
+
+	async function copyAiAnswer() {
+		if (!aiOverview?.answer) return;
+		try {
+			await navigator.clipboard.writeText(aiOverview.answer.replace(/\[\d+\]/g, '').trim());
+			copiedAi = true;
+			setTimeout(() => {
+				copiedAi = false;
+			}, 2000);
+		} catch (_) {}
+	}
+
+	function formatAiMarkdown(text: string): string {
+		if (!text) return '';
+		return text
+			.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+			.replace(/^### (.*?)$/gm, '<h4 class="ai-subheading">$1</h4>')
+			.replace(/^\* (.*?)$/gm, '<li class="ai-bullet">$1</li>')
+			.replace(/\[(\d+)\]/g, '<span class="cite-pill" title="উৎস $1">[$1]</span>')
+			.replace(/\n\n/g, '<p class="ai-para"></p>');
 	}
 
 	function goToPage(p: number) {
@@ -120,18 +195,6 @@
 		}
 	}
 
-	async function saveQueryToEncryptedHistory(query: string) {
-		try {
-			const key = await deriveKey('sandhan-default-pass');
-			const payload = await encryptJSON(key, { q: query, ts: Date.now() });
-			const existing = JSON.parse(localStorage.getItem('sandhan_history') || '[]');
-			existing.unshift(payload);
-			localStorage.setItem('sandhan_history', JSON.stringify(existing.slice(0, 50)));
-		} catch (e) {
-			console.warn('Encrypted history save skipped', e);
-		}
-	}
-
 	function handleQuickSearch(q: string) {
 		searchQuery = q;
 		currentPage = 1;
@@ -145,17 +208,27 @@
 		}
 	}
 
+	function handleLogoImgError(e: Event) {
+		const img = e.currentTarget as HTMLImageElement | null;
+		if (img && !img.src.endsWith('sandhan_logo.png')) {
+			img.src = '/sandhan_logo.png';
+		}
+	}
+
 	function resetToHome() {
 		hasSearched = false;
 		searchQuery = '';
 		searchResponse = null;
 		instantResult = null;
+		aiOverview = null;
+		isAiLoading = false;
 		selectedCategory = 'all';
 		currentPage = 1;
 		const url = new URL(window.location.href);
 		url.searchParams.delete('q');
 		url.searchParams.delete('cat');
 		url.searchParams.delete('page');
+		url.searchParams.delete('ai');
 		window.history.pushState({}, '', url);
 	}
 </script>
@@ -164,7 +237,7 @@
 	<!-- LANDING HERO -->
 	<section class="landing-section">
 		<div class="hero-logo-box">
-			<h1 class="hero-title">{t('appName')}</h1>
+			<img src="/sandhan_logo.png" alt="সন্ধান" class="hero-logo-img" />
 			<p class="hero-subtitle">{t('tagline')}</p>
 		</div>
 
@@ -181,11 +254,19 @@
 			</form>
 		</div>
 
+		<!-- AI Mode Quick Switch & Questions -->
+		<div class="ai-mode-bar">
+			<button class="ai-toggle-pill" class:active={isAiMode} on:click={toggleAiMode}>
+				<span class="sparkle">✨</span>
+				<span>{t('aiMode')} {isAiMode ? 'অন (ON)' : 'অফ (OFF)'}</span>
+			</button>
+			<span class="ai-hint-text">প্রশ্ন করলেই এআই সারসংক্ষেপ ও রিয়েল-টাইম তথ্য বিশ্লেষণ</span>
+		</div>
+
 		<!-- Quick Bang & Search Suggestions -->
 		<div class="quick-chips">
-			<button class="chip" on:click={() => handleQuickSearch('joysriram sarkar')}>👤 joysriram sarkar</button>
-			<button class="chip" on:click={() => handleQuickSearch('অ্যান্টিগ্রাভিটি')}>🚀 অ্যান্টিগ্রাভিটি</button>
-			<button class="chip" on:click={() => handleQuickSearch('রবীন্দ্রনাথ ঠাকুর')}>📖 রবীন্দ্রনাথ ঠাকুর</button>
+			<button class="chip ai-chip" on:click={() => handleQuickSearch('কৃত্রিম বুদ্ধিমত্তা কী?')}>✨ কৃত্রিম বুদ্ধিমত্তা কী?</button>
+			<button class="chip ai-chip" on:click={() => handleQuickSearch('রবীন্দ্রনাথ কেন নোবেল পেয়েছিলেন?')}>✨ রবীন্দ্রনাথ কেন নোবেল পেয়েছিলেন?</button>
 			<button class="chip" on:click={() => handleQuickSearch('পদ্মা সেতু')}>🌉 পদ্মা সেতু</button>
 			<button class="chip" on:click={() => handleQuickSearch('২৫ * ৪৮')}>⚡ ২৫ * ৪৮</button>
 			<button class="chip" on:click={() => handleQuickSearch('!w বাংলাদেশ')}><b>!w</b> উইকিপিডিয়া</button>
@@ -195,14 +276,14 @@
 		<!-- Feature Highlights -->
 		<div class="feature-cards">
 			<div class="card">
-				<div class="card-icon">🌐</div>
-				<h3>সারা বিশ্বের উন্মুক্ত ওয়েব</h3>
-				<p>সমগ্র ইন্টারনেটের কোটি কোটি ওয়েবসাইট, ব্লগ, উইকি ও নিউজ পোর্টাল থেকে তাৎক্ষণিক ফলাফল।</p>
+				<div class="card-icon">🤖</div>
+				<h3>এআই সারসংক্ষেপ (AI Mode)</h3>
+				<p>যেকোনো প্রশ্নের জন্য সারা বিশ্বের উন্মুক্ত ওয়েব থেকে সংগৃহীত নির্ভরযোগ্য ও উদ্ধৃতিযুক্ত উত্তর।</p>
 			</div>
 			<div class="card">
-				<div class="card-icon">🔐</div>
-				<h3>শূন্য-জ্ঞান গোপনীয়তা</h3>
-				<p>সার্চ হিস্টরি ক্লায়েন্ট-সাইডে AES-256-GCM এনক্রিপ্টেড। সার্ভারে কোনো আইপি বা কোয়েরি লগিং নেই।</p>
+				<div class="card-icon">⚡</div>
+				<h3>তাত্ক্ষণিক ও নির্ভরযোগ্য সার্চ</h3>
+				<p>DuckDuckGo ও উইকিপিডিয়ার মাল্টি-ইঞ্জিন ক্যাসকেডে দ্রুততম সার্চ রেজাল্ট।</p>
 			</div>
 			<div class="card">
 				<div class="card-icon">🔍</div>
@@ -226,6 +307,9 @@
 				/>
 				<button type="submit" class="search-btn">🔍</button>
 			</form>
+			<button class="ai-top-toggle" class:active={isAiMode} on:click={toggleAiMode} title={t('aiMode')}>
+				✨ {t('aiMode')}
+			</button>
 		</div>
 
 		<!-- Category Tabs & Goggles Bar -->
@@ -296,6 +380,80 @@
 		<div class="serp-grid">
 			<!-- Main Results Column -->
 			<div class="results-col">
+				<!-- AI Overview Card (Shown before search results if question or AI Mode) -->
+				{#if isAiLoading}
+					<div class="ai-overview-card loading">
+						<div class="ai-header">
+							<div class="ai-title-wrap">
+								<span class="ai-sparkle">✨</span>
+								<span class="ai-title">{t('aiOverview')}</span>
+								<span class="ai-badge">{t('aiBadge')}</span>
+							</div>
+						</div>
+						<div class="ai-shimmer-body">
+							<div class="shimmer-line line-1"></div>
+							<div class="shimmer-line line-2"></div>
+							<div class="shimmer-line line-3"></div>
+						</div>
+						<div class="ai-loading-text">{t('aiGenerating')}</div>
+					</div>
+				{:else if aiOverview}
+					<div class="ai-overview-card" class:collapsed={isAiCollapsed}>
+						<div class="ai-header">
+							<div class="ai-title-wrap">
+								<span class="ai-sparkle">✨</span>
+								<span class="ai-title">{t('aiOverview')}</span>
+								<span class="ai-badge">{t('aiBadge')}</span>
+								<span class="ai-status-pill">⚡ তথ্যাবলি সংশ্লেষণ</span>
+							</div>
+							<div class="ai-actions">
+								<button class="ai-action-btn" on:click={copyAiAnswer} title={t('copyAnswer')}>
+									{copiedAi ? '✅ ' + t('copied') : '📋 ' + t('copyAnswer')}
+								</button>
+								<button class="ai-action-btn" on:click={() => isAiCollapsed = !isAiCollapsed} title="লুকান/দেখান">
+									{isAiCollapsed ? '▼ বিস্তারিত' : '▲ সংক্ষেপ'}
+								</button>
+							</div>
+						</div>
+
+						{#if !isAiCollapsed}
+							<div class="ai-content">
+								{@html formatAiMarkdown(aiOverview.answer)}
+							</div>
+
+							<!-- Sources Section -->
+							{#if aiOverview.sources && aiOverview.sources.length > 0}
+								<div class="ai-sources-section">
+									<span class="sources-label">📚 {t('aiSources')}:</span>
+									<div class="sources-pills">
+										{#each aiOverview.sources as src}
+											<a href={src.url} target="_blank" rel="noopener noreferrer" class="source-pill" title={src.title}>
+												<img src={`https://icons.duckduckgo.com/ip3/${src.domain}.ico`} alt="" class="src-icon" on:error={handleFaviconError} />
+												<span class="src-num">[{src.index}]</span>
+												<span class="src-name">{src.domain}</span>
+											</a>
+										{/each}
+									</div>
+								</div>
+							{/if}
+
+							<!-- Related Follow-up Questions -->
+							{#if aiOverview.relatedQuestions && aiOverview.relatedQuestions.length > 0}
+								<div class="ai-followup-section">
+									<span class="followup-label">💡 {t('relatedQuestions')}:</span>
+									<div class="followup-chips">
+										{#each aiOverview.relatedQuestions as rq}
+											<button class="followup-chip" on:click={() => handleQuickSearch(rq)}>
+												<span>❓ {rq}</span>
+											</button>
+										{/each}
+									</div>
+								</div>
+							{/if}
+						{/if}
+					</div>
+				{/if}
+
 				{#if isSearching}
 					<div class="loading-state">
 						<div class="spinner"></div>
@@ -398,113 +556,121 @@
 						<div class="kp-sub">{searchResponse.knowledge.subtitle}</div>
 						<p class="kp-desc">{searchResponse.knowledge.description}</p>
 						
-						<div class="kp-attributes">
-							{#each searchResponse.knowledge.attributes as [k, v]}
-								<div class="kp-attr-row">
-									<span class="attr-key">{k}</span>
-									<span class="attr-val">{v}</span>
-								</div>
-							{/each}
-						</div>
+						{#if searchResponse.knowledge.attributes && searchResponse.knowledge.attributes.length > 0}
+							<div class="kp-attr-grid">
+								{#each searchResponse.knowledge.attributes as [k, v]}
+									<div class="kp-attr-row">
+										<span class="kp-k">{k}</span>
+										<span class="kp-v">{v}</span>
+									</div>
+								{/each}
+							</div>
+						{/if}
 
-						<a href={searchResponse.knowledge.sourceUrl} target="_blank" rel="noopener noreferrer" class="kp-source-link">
-							জ্ঞানভাণ্ডারে সম্পূর্ণ পড়ুন →
-						</a>
+						<div class="kp-footer">
+							<a href={searchResponse.knowledge.sourceUrl} target="_blank" rel="noopener noreferrer">উইকিপিডিয়ায় আরও জানুন →</a>
+						</div>
 					</div>
 				{/if}
-
-				<div class="privacy-guarantee-card">
-					<h4>🔒 শূন্য-জ্ঞান ওয়েব সার্চ</h4>
-					<p>{t('privacyNote')}</p>
-				</div>
 			</aside>
 		</div>
 	</section>
 {/if}
 
-<!-- Why This Result Modal -->
+<!-- Modals -->
 {#if activeWhySignal}
-	<div class="scrim" on:click={() => activeWhySignal = null} role="presentation"></div>
-	<div class="modal">
-		<h3>💡 {t('whyTitle')}</h3>
-		<p class="why-explanation">{activeWhySignal.explanation}</p>
-
-		<div class="signals-breakdown">
-			<div class="signal-row">
-				<span>BM25 কিওয়ার্ড ম্যাচ স্কোর</span>
-				<b>{(activeWhySignal.bm25 * 100).toFixed(0)}%</b>
+	<div class="modal-backdrop" on:click={() => activeWhySignal = null}>
+		<div class="modal-card" on:click|stopPropagation>
+			<h3>💡 {t('whyTitle')}</h3>
+			<p class="modal-desc">{activeWhySignal.explanation}</p>
+			<div class="signal-metrics">
+				<div class="metric-row">
+					<span>কীওয়ার্ড প্রাসঙ্গিকতা (BM25):</span>
+					<strong>{(activeWhySignal.bm25 * 100).toFixed(0)}%</strong>
+				</div>
+				<div class="metric-row">
+					<span>ডোমেইন অথরিটি:</span>
+					<strong>{(activeWhySignal.authority * 100).toFixed(0)}%</strong>
+				</div>
+				<div class="metric-row">
+					<span>তথ্য তাজাতা (Freshness):</span>
+					<strong>{(activeWhySignal.freshness * 100).toFixed(0)}%</strong>
+				</div>
 			</div>
-			<div class="signal-row">
-				<span>ডোমেইন অথরিটি সিগন্যাল</span>
-				<b>{(activeWhySignal.authority * 100).toFixed(0)}%</b>
-			</div>
-			<div class="signal-row">
-				<span>ফ্রেশনেস (তাত্ক্ষণিকতা মান)</span>
-				<b>{(activeWhySignal.freshness * 100).toFixed(0)}%</b>
-			</div>
+			<button class="modal-close-btn" on:click={() => activeWhySignal = null}>ঠিক আছে</button>
 		</div>
-
-		<button class="primary-btn full-btn" on:click={() => activeWhySignal = null}>ঠিক আছে</button>
 	</div>
 {/if}
 
-<!-- Incognito / Proxy Preview Modal -->
 {#if incognitoUrl}
-	<div class="scrim" on:click={() => incognitoUrl = ''} role="presentation"></div>
-	<div class="modal large-modal">
-		<div class="modal-top">
-			<h3>🛡️ ছদ্মবেশী ভিউ (Incognito Web View)</h3>
-			<button class="close-btn" on:click={() => incognitoUrl = ''}>✕</button>
-		</div>
-		<p style="font-size: 0.85rem; color: var(--ink-soft); margin-bottom: 10px; word-break: break-all;">
-			তৃতীয় পক্ষের ট্র্যাকার ও আইপি ফিঙ্গারপ্রিন্ট ছাড়াই পাতা প্রদর্শন করা হচ্ছে: <code>{incognitoUrl}</code>
-		</p>
-		<div class="proxy-frame-box">
-			<iframe src={incognitoUrl} title="Anonymous Preview" sandbox="allow-same-origin allow-scripts"></iframe>
+	<div class="modal-backdrop" on:click={() => incognitoUrl = ''}>
+		<div class="modal-card" on:click|stopPropagation>
+			<h3>🛡️ {t('incognitoView')}</h3>
+			<p class="modal-desc">কুকিজ ও ট্র্যাকার ছাড়া ছদ্মবেশী মোডে সাইটটি খুলতে নিচের বোতামটি চাপুন:</p>
+			<div class="incognito-url-box">{incognitoUrl}</div>
+			<div class="incognito-actions">
+				<a href={incognitoUrl} target="_blank" rel="noreferrer noopener" class="primary-btn" on:click={() => incognitoUrl = ''}>
+					ট্র্যাকারহীন ট্যাবে খুলুন ↗
+				</a>
+				<button class="modal-close-btn" on:click={() => incognitoUrl = ''}>বাতিল</button>
+			</div>
 		</div>
 	</div>
 {/if}
 
 <style>
+	/* Landing Hero Styles */
 	.landing-section {
 		display: flex;
 		flex-direction: column;
 		align-items: center;
+		justify-content: center;
+		min-height: 68vh;
 		text-align: center;
-		padding: 24px 0;
-		width: 100%;
+		padding: 40px 16px;
 	}
-	.hero-title {
-		font-family: 'Noto Serif Bengali', serif;
-		font-size: clamp(2.8rem, 8vw, 4.5rem);
-		font-weight: 900;
-		letter-spacing: -1.5px;
-		background: linear-gradient(135deg, var(--ink) 30%, var(--accent));
-		-webkit-background-clip: text;
-		background-clip: text;
-		-webkit-text-fill-color: transparent;
+	.hero-logo-box {
+		margin-bottom: 26px;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+	}
+	.hero-logo-img {
+		width: clamp(280px, 42vw, 440px);
+		height: auto;
+		max-height: 180px;
+		object-fit: contain;
+		margin: 0 auto 10px;
+		display: block;
+		background: transparent;
+		border: none;
+		box-shadow: none;
+		filter: drop-shadow(0 6px 20px rgba(14, 122, 99, 0.16));
+		transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+	}
+	.hero-logo-img:hover {
+		transform: scale(1.04);
 	}
 	.hero-subtitle {
-		font-size: clamp(1rem, 3.5vw, 1.2rem);
+		font-size: clamp(1rem, 2.5vw, 1.22rem);
 		color: var(--ink-soft);
 		margin-top: 4px;
-		margin-bottom: 24px;
-		word-break: break-word;
+		font-weight: 500;
 	}
 	.search-box-wrap {
 		width: 100%;
-		max-width: 680px;
+		max-width: 640px;
+		margin-bottom: 12px;
 	}
 	.search-form, .serp-search-form {
 		display: flex;
 		align-items: center;
 		background: var(--bg-elev);
-		border: 2px solid var(--line);
-		border-radius: 16px;
-		padding: 4px 6px 4px 16px;
+		border: 1.5px solid var(--line);
+		border-radius: var(--radius-full);
 		box-shadow: var(--shadow);
+		padding: 4px 6px 4px 18px;
 		transition: all 0.2s ease;
-		width: 100%;
 	}
 	.search-form:focus-within, .serp-search-form:focus-within {
 		border-color: var(--accent);
@@ -512,83 +678,128 @@
 	}
 	.search-form input, .serp-search-form input {
 		flex: 1;
-		min-width: 0;
 		border: none;
-		outline: none;
 		background: transparent;
 		font-size: 1.05rem;
 		color: var(--ink);
+		outline: none;
 		font-family: inherit;
-		padding: 8px 0;
+		min-width: 0;
 	}
 	.search-btn {
-		width: 40px;
-		height: 40px;
-		border-radius: 10px;
+		width: 44px;
+		height: 44px;
+		border-radius: 50%;
 		background: var(--accent);
-		color: #fff;
+		color: var(--accent-ink);
+		border: none;
+		display: flex;
+		align-items: center;
+		justify-content: center;
 		font-size: 1.1rem;
-		display: grid;
-		place-items: center;
 		flex-shrink: 0;
-		transition: background 0.2s;
+		transition: transform 0.15s ease, background 0.15s ease;
 	}
 	.search-btn:hover {
 		background: var(--accent-hover);
+		transform: scale(1.05);
 	}
+
+	/* AI Mode Bar in Landing */
+	.ai-mode-bar {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 10px;
+		margin-bottom: 18px;
+		flex-wrap: wrap;
+	}
+	.ai-toggle-pill {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		padding: 6px 14px;
+		border-radius: var(--radius-full);
+		background: var(--chip);
+		border: 1.5px solid var(--line);
+		color: var(--accent);
+		font-size: 0.84rem;
+		font-weight: 700;
+		cursor: pointer;
+		transition: all 0.2s ease;
+	}
+	.ai-toggle-pill.active {
+		background: linear-gradient(135deg, var(--accent), #095041);
+		color: #ffffff;
+		border-color: transparent;
+		box-shadow: 0 3px 10px rgba(14, 122, 99, 0.3);
+	}
+	.ai-hint-text {
+		font-size: 0.82rem;
+		color: var(--ink-faint);
+	}
+
 	.quick-chips {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 6px;
+		gap: 8px;
 		justify-content: center;
-		margin-top: 18px;
-		max-width: 720px;
-		width: 100%;
+		max-width: 680px;
+		margin-bottom: 36px;
 	}
 	.chip {
-		padding: 5px 12px;
-		border-radius: 16px;
-		background: var(--chip);
-		color: var(--accent);
-		font-size: 0.82rem;
-		font-weight: 600;
+		padding: 6px 12px;
+		background: var(--bg-soft);
 		border: 1px solid var(--line);
-		transition: transform 0.15s, background 0.2s;
+		border-radius: var(--radius-full);
+		font-size: 0.85rem;
+		color: var(--ink-soft);
+		transition: all 0.2s ease;
+	}
+	.chip.ai-chip {
+		background: var(--chip);
+		border-color: var(--accent);
+		color: var(--accent);
+		font-weight: 600;
 	}
 	.chip:hover {
+		background: var(--bg-elev);
+		border-color: var(--accent);
+		color: var(--ink);
 		transform: translateY(-1px);
-		background: var(--bg-soft);
+	}
+	.chip b {
+		color: var(--warm);
 	}
 	.feature-cards {
 		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+		grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
 		gap: 16px;
-		margin-top: 36px;
 		width: 100%;
-		max-width: 950px;
-		text-align: left;
+		max-width: 820px;
 	}
 	.card {
 		background: var(--bg-elev);
 		border: 1px solid var(--line);
-		border-radius: 14px;
-		padding: 18px;
+		border-radius: 16px;
+		padding: 20px 18px;
+		text-align: left;
 		box-shadow: var(--shadow);
 	}
 	.card-icon {
-		font-size: 28px;
+		font-size: 1.8rem;
 		margin-bottom: 8px;
 	}
 	.card h3 {
-		font-family: 'Noto Serif Bengali', serif;
-		font-size: 1.15rem;
-		margin-bottom: 6px;
+		font-size: 1rem;
+		font-weight: 700;
 		color: var(--ink);
+		margin-bottom: 6px;
 	}
 	.card p {
-		font-size: 0.88rem;
+		font-size: 0.85rem;
 		color: var(--ink-soft);
-		line-height: 1.55;
+		line-height: 1.5;
 	}
 
 	/* SERP Styles */
@@ -617,6 +828,25 @@
 		flex: 1;
 		min-width: 200px;
 	}
+	.ai-top-toggle {
+		padding: 8px 14px;
+		border-radius: 10px;
+		background: var(--chip);
+		border: 1.5px solid var(--line);
+		color: var(--accent);
+		font-weight: 700;
+		font-size: 0.86rem;
+		cursor: pointer;
+		white-space: nowrap;
+		transition: all 0.2s ease;
+	}
+	.ai-top-toggle.active {
+		background: linear-gradient(135deg, var(--accent), #095041);
+		color: #ffffff;
+		border-color: transparent;
+		box-shadow: 0 2px 8px rgba(14, 122, 99, 0.3);
+	}
+
 	.category-bar-wrap {
 		display: flex;
 		align-items: center;
@@ -712,6 +942,227 @@
 		color: var(--ink-soft);
 		margin-top: 4px;
 	}
+
+	/* AI Overview Card Styles */
+	.ai-overview-card {
+		background: var(--bg-elev);
+		border: 1.5px solid transparent;
+		border-radius: 16px;
+		padding: 18px 20px;
+		margin-bottom: 18px;
+		box-shadow: 0 4px 20px rgba(14, 122, 99, 0.08);
+		position: relative;
+		background-clip: padding-box;
+		border-image: linear-gradient(135deg, var(--accent), #2fbf9a, var(--warm)) 1;
+		border-radius: 16px;
+		transition: all 0.25s ease;
+	}
+	.ai-overview-card.loading {
+		border: 1px dashed var(--accent);
+		padding: 16px 20px;
+	}
+	.ai-overview-card.collapsed {
+		padding: 14px 20px;
+	}
+	.ai-header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		margin-bottom: 12px;
+		flex-wrap: wrap;
+		gap: 8px;
+	}
+	.ai-title-wrap {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		flex-wrap: wrap;
+	}
+	.ai-sparkle {
+		font-size: 1.2rem;
+		color: var(--accent);
+	}
+	.ai-title {
+		font-weight: 700;
+		font-size: 1.05rem;
+		color: var(--ink);
+	}
+	.ai-badge {
+		background: linear-gradient(135deg, var(--accent), #095041);
+		color: #ffffff;
+		font-size: 0.72rem;
+		font-weight: 700;
+		padding: 2px 8px;
+		border-radius: var(--radius-full);
+	}
+	.ai-status-pill {
+		font-size: 0.72rem;
+		color: var(--ink-faint);
+		background: var(--bg-soft);
+		padding: 2px 8px;
+		border-radius: var(--radius-full);
+	}
+	.ai-actions {
+		display: flex;
+		gap: 6px;
+	}
+	.ai-action-btn {
+		background: var(--bg-soft);
+		border: 1px solid var(--line);
+		color: var(--ink-soft);
+		padding: 4px 10px;
+		border-radius: 8px;
+		font-size: 0.76rem;
+		font-weight: 600;
+		cursor: pointer;
+		transition: background 0.15s, color 0.15s;
+	}
+	.ai-action-btn:hover {
+		background: var(--chip);
+		color: var(--accent);
+	}
+	.ai-content {
+		font-size: 0.95rem;
+		line-height: 1.65;
+		color: var(--ink);
+		margin-bottom: 14px;
+	}
+	:global(.ai-subheading) {
+		font-size: 0.92rem;
+		font-weight: 700;
+		color: var(--accent);
+		margin-top: 10px;
+		margin-bottom: 4px;
+	}
+	:global(.ai-bullet) {
+		margin-left: 18px;
+		margin-bottom: 4px;
+		list-style-type: disc;
+	}
+	:global(.cite-pill) {
+		display: inline-block;
+		font-size: 0.72rem;
+		font-weight: 700;
+		color: var(--accent);
+		background: var(--chip);
+		padding: 1px 5px;
+		border-radius: 4px;
+		margin: 0 2px;
+		vertical-align: super;
+		cursor: help;
+	}
+	.ai-sources-section {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		border-top: 1px solid var(--line);
+		padding-top: 10px;
+		margin-top: 10px;
+		flex-wrap: wrap;
+	}
+	.sources-label {
+		font-size: 0.78rem;
+		font-weight: 700;
+		color: var(--ink-soft);
+		white-space: nowrap;
+	}
+	.sources-pills {
+		display: flex;
+		gap: 6px;
+		flex-wrap: wrap;
+	}
+	.source-pill {
+		display: inline-flex;
+		align-items: center;
+		gap: 5px;
+		background: var(--bg-soft);
+		border: 1px solid var(--line);
+		padding: 3px 8px;
+		border-radius: var(--radius-full);
+		font-size: 0.76rem;
+		color: var(--ink);
+		text-decoration: none;
+		transition: all 0.15s ease;
+	}
+	.source-pill:hover {
+		background: var(--chip);
+		border-color: var(--accent);
+		color: var(--accent);
+	}
+	.src-icon {
+		width: 12px;
+		height: 12px;
+		border-radius: 2px;
+	}
+	.src-num {
+		font-weight: 700;
+		color: var(--accent);
+	}
+	.src-name {
+		font-weight: 500;
+	}
+	.ai-followup-section {
+		margin-top: 12px;
+		border-top: 1px dashed var(--line);
+		padding-top: 10px;
+	}
+	.followup-label {
+		font-size: 0.78rem;
+		font-weight: 700;
+		color: var(--ink-soft);
+		display: block;
+		margin-bottom: 6px;
+	}
+	.followup-chips {
+		display: flex;
+		gap: 6px;
+		flex-wrap: wrap;
+	}
+	.followup-chip {
+		background: var(--bg-soft);
+		border: 1px solid var(--line);
+		color: var(--ink);
+		padding: 4px 10px;
+		border-radius: var(--radius-full);
+		font-size: 0.8rem;
+		cursor: pointer;
+		transition: all 0.15s ease;
+		text-align: left;
+	}
+	.followup-chip:hover {
+		background: var(--chip);
+		border-color: var(--accent);
+		color: var(--accent);
+		transform: translateY(-1px);
+	}
+
+	/* Shimmer Loading for AI */
+	.ai-shimmer-body {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+		margin: 10px 0;
+	}
+	.shimmer-line {
+		height: 14px;
+		border-radius: 6px;
+		background: linear-gradient(90deg, var(--bg-soft) 25%, var(--chip) 50%, var(--bg-soft) 75%);
+		background-size: 200% 100%;
+		animation: shimmer 1.5s infinite;
+	}
+	.shimmer-line.line-1 { width: 95%; }
+	.shimmer-line.line-2 { width: 85%; }
+	.shimmer-line.line-3 { width: 65%; }
+	.ai-loading-text {
+		font-size: 0.82rem;
+		color: var(--accent);
+		font-weight: 600;
+	}
+	@keyframes shimmer {
+		0% { background-position: 200% 0; }
+		100% { background-position: -200% 0; }
+	}
+
 	.serp-grid {
 		display: grid;
 		grid-template-columns: 1fr 320px;
@@ -849,100 +1300,68 @@
 	.kp-heading {
 		font-family: 'Noto Serif Bengali', serif;
 		font-size: 1.25rem;
-		font-weight: 900;
+		font-weight: 700;
 		margin-bottom: 2px;
 	}
 	.kp-sub {
-		font-size: 0.82rem;
-		color: var(--accent);
-		font-weight: 600;
-		margin-bottom: 10px;
+		font-size: 0.8rem;
+		color: var(--ink-soft);
+		margin-bottom: 8px;
 	}
 	.kp-desc {
 		font-size: 0.88rem;
-		color: var(--ink-soft);
-		line-height: 1.55;
-		margin-bottom: 14px;
+		color: var(--ink);
+		line-height: 1.5;
+		margin-bottom: 12px;
 	}
-	.kp-attributes {
-		border-top: 1px solid var(--line);
-		padding-top: 8px;
+	.kp-attr-grid {
 		display: flex;
 		flex-direction: column;
 		gap: 6px;
+		border-top: 1px solid var(--line);
+		padding-top: 10px;
+		margin-bottom: 12px;
 	}
 	.kp-attr-row {
 		display: flex;
 		justify-content: space-between;
 		font-size: 0.82rem;
-		gap: 8px;
 	}
-	.attr-key { font-weight: 600; color: var(--ink); flex-shrink: 0; }
-	.attr-val { color: var(--ink-soft); text-align: right; word-break: break-word; }
-	.kp-source-link {
-		display: inline-block;
-		margin-top: 12px;
+	.kp-k {
+		color: var(--ink-soft);
+	}
+	.kp-v {
+		font-weight: 600;
+		color: var(--ink);
+	}
+	.kp-footer {
+		border-top: 1px solid var(--line);
+		padding-top: 8px;
 		font-size: 0.82rem;
+	}
+	.kp-footer a {
+		color: var(--accent);
 		font-weight: 600;
 	}
-	.privacy-guarantee-card {
-		background: var(--chip);
-		border: 1px solid var(--line);
-		border-radius: 12px;
-		padding: 14px;
-		color: var(--accent);
+	.empty-state {
+		text-align: center;
+		padding: 40px 16px;
+		background: var(--bg-elev);
+		border: 1px dashed var(--line);
+		border-radius: 16px;
 	}
-	.privacy-guarantee-card h4 {
-		margin-bottom: 4px;
-		font-size: 0.92rem;
+	.empty-state h3 {
+		font-size: 1.15rem;
+		margin-bottom: 6px;
+		color: var(--ink);
 	}
-	.privacy-guarantee-card p {
-		font-size: 0.82rem;
-		line-height: 1.5;
-	}
-	.signals-breakdown {
-		margin: 14px 0;
-		display: flex;
-		flex-direction: column;
-		gap: 8px;
-	}
-	.signal-row {
-		display: flex;
-		justify-content: space-between;
-		font-size: 0.85rem;
-		padding: 6px 0;
-		border-bottom: 1px solid var(--line);
-		gap: 8px;
-	}
-	.large-modal {
-		max-width: 800px;
-		width: 94vw;
-		height: 80vh;
-		display: flex;
-		flex-direction: column;
-		padding: 16px;
-	}
-	.modal-top {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		margin-bottom: 8px;
-	}
-	.proxy-frame-box {
-		flex: 1;
-		background: #fff;
-		border-radius: 10px;
-		overflow: hidden;
-		border: 1px solid var(--line);
-	}
-	.proxy-frame-box iframe {
-		width: 100%;
-		height: 100%;
-		border: none;
+	.empty-state p {
+		font-size: 0.9rem;
+		color: var(--ink-soft);
 	}
 	.images-grid {
 		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+		grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
 		gap: 10px;
 	}
 	.image-card {
@@ -1060,5 +1479,97 @@
 	}
 	@keyframes spin {
 		to { transform: rotate(360deg); }
+	}
+
+	/* Modal Backdrop & Card */
+	.modal-backdrop {
+		position: fixed;
+		inset: 0;
+		background: rgba(0, 0, 0, 0.5);
+		backdrop-filter: blur(4px);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: 16px;
+		z-index: 1000;
+	}
+	.modal-card {
+		background: var(--bg-elev);
+		border: 1px solid var(--line);
+		border-radius: 16px;
+		padding: 24px;
+		max-width: 480px;
+		width: 100%;
+		box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+	}
+	.modal-card h3 {
+		font-size: 1.15rem;
+		font-weight: 700;
+		margin-bottom: 8px;
+		color: var(--ink);
+	}
+	.modal-desc {
+		font-size: 0.9rem;
+		color: var(--ink-soft);
+		margin-bottom: 16px;
+		line-height: 1.5;
+	}
+	.signal-metrics {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+		background: var(--bg-soft);
+		padding: 12px 14px;
+		border-radius: 10px;
+		margin-bottom: 18px;
+	}
+	.metric-row {
+		display: flex;
+		justify-content: space-between;
+		font-size: 0.85rem;
+		color: var(--ink);
+	}
+	.metric-row strong {
+		color: var(--accent);
+	}
+	.modal-close-btn {
+		width: 100%;
+		padding: 10px;
+		background: var(--chip);
+		color: var(--accent);
+		border: none;
+		border-radius: 10px;
+		font-weight: 700;
+		cursor: pointer;
+		transition: background 0.15s;
+	}
+	.modal-close-btn:hover {
+		background: var(--line);
+	}
+	.incognito-url-box {
+		background: var(--bg-soft);
+		border: 1px solid var(--line);
+		border-radius: 8px;
+		padding: 8px 12px;
+		font-family: monospace;
+		font-size: 0.82rem;
+		color: var(--accent);
+		word-break: break-all;
+		margin-bottom: 16px;
+	}
+	.incognito-actions {
+		display: flex;
+		gap: 8px;
+	}
+	.primary-btn {
+		flex: 1;
+		padding: 10px;
+		background: var(--accent);
+		color: #ffffff;
+		border-radius: 10px;
+		font-weight: 700;
+		font-size: 0.88rem;
+		text-align: center;
+		text-decoration: none;
 	}
 </style>

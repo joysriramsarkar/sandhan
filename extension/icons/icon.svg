@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <defs>
+    <linearGradient id="sandhanGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2fbf9a"/>
+      <stop offset="50%" stop-color="#0e7a63"/>
+      <stop offset="100%" stop-color="#064034"/>
+    </linearGradient>
+    <filter id="dropGlow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#0e7a63" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+  
+  <!-- Rounded Base -->
+  <rect x="8" y="8" width="112" height="112" rx="28" fill="url(#sandhanGrad)" filter="url(#dropGlow)"/>
+  
+  <!-- Subtle Inner Border -->
+  <rect x="8" y="8" width="112" height="112" rx="28" fill="none" stroke="#ffffff" stroke-width="2" stroke-opacity="0.2"/>
+  
+  <!-- Bengali Glyph 'স' -->
+  <text x="64" y="84" font-family="'Noto Sans Bengali', 'Segoe UI', system-ui, sans-serif" font-size="68" font-weight="bold" fill="#ffffff" text-anchor="middle">স</text>
+</svg>
