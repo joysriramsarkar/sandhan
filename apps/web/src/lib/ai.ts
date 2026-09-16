@@ -23,19 +23,19 @@ const QUESTION_PATTERNS_BN = [
 	/\?$/,
 	/^(কি|কী|কেন|কীভাবে|কিভাবে|কোথায়|কোথায়|কখন|কে|কাকে|কার|কোন|কোনটি|কত|কতো)/i,
 	/(কী|কি|কেন|কীভাবে|কিভাবে|কোথায়|কোথায়|কখন|কে|কার|কোন|কত|কতো)(\s+|$)/i,
-	/(ব্যাখ্যা|সম্পর্কে বলুন|পার্থক্য|ইতিহাস|অর্থ|মানে কী|কারণ কী|কী বোঝায়)/i
+	/(ব্যাখ্যা|সম্পর্কে বলুন|সম্পর্কে জানাও|পার্থক্য|তুলনা|ইতিহাস|অর্থ|মানে কী|কারণ কী|কী বোঝায়|সংজ্ঞা|উদাহরণ|তালিকা দাও|কীভাবে করব|বুঝিয়ে বল)/i
 ];
 
 const QUESTION_PATTERNS_EN = [
 	/\?$/,
 	/^(what|why|how|who|where|when|which|whose|whom|is|are|can|could|does|do|did|explain|tell me|define|difference between|guide to|summary of)/i,
-	/(what is|how to|why does|who is|where is|when was|difference between)/i
+	/(what is|how to|why does|who is|where is|when was|difference between|compare|list|examples of|meaning of|define|steps to|can you explain)/i
 ];
 
 const QUESTION_PATTERNS_HI = [
 	/\?$/,
 	/^(क्या|क्यों|कैसे|कहाँ|कब|कौन|किसका|कितना|बताइए|समझाइए)/i,
-	/(क्या है|कैसे करें|क्यों होता है|मतलब क्या है)/i
+	/(क्या है|कैसे करें|क्यों होता है|मतलब क्या है|अंतर बताइए|उदाहरण|परिभाषा|सूची|समझाएं)/i
 ];
 
 export function isQuestionQuery(query: string, lang = 'bn'): boolean {
@@ -50,7 +50,10 @@ export function isQuestionQuery(query: string, lang = 'bn'): boolean {
 				? QUESTION_PATTERNS_HI
 				: [...QUESTION_PATTERNS_BN, ...QUESTION_PATTERNS_EN];
 
-	return patterns.some((p) => p.test(trimmed));
+	if (patterns.some((p) => p.test(trimmed))) return true;
+
+	// Conversational requests often omit a question word but still ask for an answer.
+	return /\b(please|tell|show|help|explain|give me|জানাও|বলুন|দাও|দেখাও|সাহায্য করুন)\b/i.test(trimmed);
 }
 
 export async function fetchAiOverview(

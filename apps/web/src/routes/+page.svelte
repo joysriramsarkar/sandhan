@@ -1,8 +1,29 @@
+<svelte:head>
+	<title>সন্ধান (Sandhan) — উন্মুক্ত, গোপনীয়তা-প্রথম সার্চ ইঞ্জিন ও এআই সারসংক্ষেপ</title>
+	<meta name="description" content="সন্ধান (Sandhan) হলো উন্মুক্ত ও গোপনীয়তা-প্রথম বাংলা সার্চ ইঞ্জিন। সরাসরি এআই সারসংক্ষেপ, নির্ভরযোগ্য ফ্যাক্ট এবং কোনো ধরনের ইউজার ট্র্যাকিং ছাড়া সুপারফাস্ট সার্চ।" />
+	<meta name="keywords" content="সন্ধান, sandhan, sandhan search engine, bangla search engine, বাংলা সার্চ ইঞ্জিন, bangla ai search, privacy search engine bangladesh, fast bangla search, bangladesh ai search" />
+	<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+	<link rel="canonical" href="https://sandhan.site/" />
+	<meta property="og:type" content="website" />
+	<meta property="og:url" content="https://sandhan.site/" />
+	<meta property="og:site_name" content="সন্ধান (Sandhan)" />
+	<meta property="og:title" content="সন্ধান (Sandhan) — উন্মুক্ত, গোপনীয়তা-প্রথম সার্চ ইঞ্জিন ও এআই সারসংক্ষেপ" />
+	<meta property="og:description" content="বাংলা ভাষার প্রথম উন্মুক্ত ও প্রাইভেসি-ফার্স্ট সার্চ ইঞ্জিন। সরাসরি এআই উত্তর, নির্ভরযোগ্য ফ্যাক্ট এবং কোনো ধরনের ইউজার ট্র্যাকিং ছাড়া সুপারফাস্ট সার্চ।" />
+	<meta property="og:image" content="https://sandhan.site/favicon.svg" />
+	<meta property="og:locale" content="bn_BD" />
+	<meta property="og:locale:alternate" content="en_US" />
+	<meta name="twitter:card" content="summary_large_image" />
+	<meta name="twitter:url" content="https://sandhan.site/" />
+	<meta name="twitter:title" content="সন্ধান (Sandhan) — উন্মুক্ত সার্চ ইঞ্জিন ও এআই সারসংক্ষেপ" />
+	<meta name="twitter:description" content="উন্মুক্ত ও প্রাইভেসি-ফার্স্ট বাংলা সার্চ ইঞ্জিন। কোনো কুকিজ ও ট্র্যাকার ছাড়া দ্রুত ও নির্ভুল তথ্য সন্ধান।" />
+	<meta name="twitter:image" content="https://sandhan.site/favicon.svg" />
+</svelte:head>
+
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { t, localeStore } from '$lib/i18n';
 	import { resolveBang } from '$lib/bangs';
-	import { getInstantAnswer, type InstantResult } from '$lib/instant';
+	import { fetchWeatherAnswer, getInstantAnswer, isWeatherQuery, type InstantResult } from '$lib/instant';
 	import { executeSearch, type SearchResponse, type SearchResultItem } from '$lib/search';
 	import { isQuestionQuery, fetchAiOverview, type AiAnswerResponse } from '$lib/ai';
 
@@ -110,6 +131,11 @@
 
 		// Instant Answers on page 1 only
 		instantResult = page === 1 ? getInstantAnswer(q) : null;
+		if (page === 1 && isWeatherQuery(q)) {
+			fetchWeatherAnswer(q).then((result) => {
+				if (searchQuery === q) instantResult = result;
+			});
+		}
 
 		// Execute Search with Goggles & Active Language & Page
 		let dsl = customGoggleDsl;

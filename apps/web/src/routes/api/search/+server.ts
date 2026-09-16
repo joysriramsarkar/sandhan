@@ -111,13 +111,24 @@ function computeTermRelevance(query: string, title: string, snippet: string): nu
 	}
 	const titleLow = (title || '').toLowerCase();
 	const snippetLow = (snippet || '').toLowerCase();
+	const titleTerms = new Set(titleLow.split(/[^\p{L}\p{N}]+/u).filter(Boolean));
+	const snippetTerms = new Set(snippetLow.split(/[^\p{L}\p{N}]+/u).filter(Boolean));
 	let matches = 0;
 	for (const term of qTerms) {
-		if (titleLow.includes(term)) matches += 2;
-		if (snippetLow.includes(term)) matches += 1;
+		if (titleTerms.has(term) || titleLow.includes(term)) matches += 2;
+		if (snippetTerms.has(term) || snippetLow.includes(term)) matches += 1;
 	}
 	const ratio = matches / (qTerms.length * 3);
-	return parseFloat(Math.min(0.99, Math.max(0.35, 0.4 + ratio * 0.55)).toFixed(2));
+	const phraseBoost = qTerms.length > 1 && titleLow.includes(qTerms.join(' ')) ? 0.08 : 0;
+	return parseFloat(Math.min(0.99, Math.max(0.3, 0.35 + ratio * 0.58 + phraseBoost)).toFixed(2));
+}
+
+function computeFreshness(category: string, publishedDate?: string): number {
+	if (publishedDate) {
+		const ageDays = Math.max(0, (Date.now() - Date.parse(publishedDate)) / 86_400_000);
+		if (Number.isFinite(ageDays)) return parseFloat(Math.max(0.2, Math.exp(-ageDays / 180)).toFixed(2));
+	}
+	return category === 'news' ? 0.96 : 0.72;
 }
 
 const SPECIAL_QUERY_EXPANSIONS: Record<string, string> = {
@@ -140,13 +151,135 @@ const SPECIAL_QUERY_EXPANSIONS: Record<string, string> = {
 
 const TYPO_MAP: Record<string, string> = {
 	'বাংলদেশ': 'বাংলাদেশ',
+	'বাংলাদশ': 'বাংলাদেশ',
+	'বাংলাদেস': 'বাংলাদেশ',
 	'রবিন্দ্রনাথ': 'রবীন্দ্রনাথ',
+	'রবীন্দনাথ': 'রবীন্দ্রনাথ',
 	'ভাসা': 'ভাষা',
+	'ভাশা': 'ভাষা',
 	'গিতাঞ্জলি': 'গীতাঞ্জলি',
+	'গীতাঞ্জলী': 'গীতাঞ্জলি',
 	'মুক্তিযুধ': 'মুক্তিযুদ্ধ',
-	'নবেল': 'নোবেল',
 	'পদমা সেতু': 'পদ্মা সেতু',
-	'ঢকা শহর': 'ঢাকা শহর'
+	'পদ্মা সেতুু': 'পদ্মা সেতু',
+	'ঢকা শহর': 'ঢাকা শহর',
+	'ঢাকা সহর': 'ঢাকা শহর',
+	'সুদুর': 'সুদূর',
+	'দুরত্ব': 'দূরত্ব',
+	'বিজ্গান': 'বিজ্ঞান',
+	'বিগ্গান': 'বিজ্ঞান',
+	'প্রযোক্তি': 'প্রযুক্তি',
+	'প্রযু্ক্তি': 'প্রযুক্তি',
+	'বিশশ্ববিদ্যালয়': 'বিশ্ববিদ্যালয়',
+	'বিশ্ববিদ্যলয়': 'বিশ্ববিদ্যালয়',
+	'স্বাধীনতা যুদ্দ': 'স্বাধীনতা যুদ্ধ',
+	'সাহিত্ত': 'সাহিত্য',
+	'অর্থনিতি': 'অর্থনীতি',
+	'চিকিতসা': 'চিকিৎসা',
+	'পরিবেশ দুষন': 'পরিবেশ দূষণ',
+	'জলবায়ু পরবর্তন': 'জলবায়ু পরিবর্তন',
+	'কৃত্তিম বুদ্ধিমত্তা': 'কৃত্রিম বুদ্ধিমত্তা',
+	'বাংলাদেশের রাজধানি': 'বাংলাদেশের রাজধানী',
+	'রাজধানি ঢাকা': 'রাজধানী ঢাকা',
+	'আন্তরজাতিক': 'আন্তর্জাতিক',
+	'গনিত': 'গণিত',
+	'গননা': 'গণনা',
+	'ব্যাবহার': 'ব্যবহার',
+	'ব্যবস্তাপনা': 'ব্যবস্থাপনা',
+	'নিরাপতা': 'নিরাপত্তা',
+	'সাস্থ্য': 'স্বাস্থ্য',
+	'স্বাস্হ্য': 'স্বাস্থ্য',
+	'উন্নয়নশিল': 'উন্নয়নশীল',
+	'বিশ্লেশন': 'বিশ্লেষণ',
+	'পরিসংখান': 'পরিসংখ্যান',
+	'প্রভাত': 'প্রভাত',
+	'অভিজ্ঞ': 'অভিজ্ঞ',
+	'প্রকাশ': 'প্রকাশ',
+	'শিক্ষা': 'শিক্ষা',
+	'অর্থনীতি': 'অর্থনীতি',
+	'প্রযুক্তি': 'প্রযুক্তি',
+	'জীবন': 'জীবন',
+	'পৃথিবী': 'পৃথিবী',
+	'বিশ্ব': 'বিশ্ব',
+	'ইতিহাস': 'ইতিহাস',
+	'সংস্কৃতি': 'সংস্কৃতি',
+	'খেলা': 'খেলাধুলা',
+	'ক্রিকেট': 'ক্রিকেট',
+	'ফুটবল': 'ফুটবল',
+	'বুয়েট': 'বুয়েট',
+	'কৃষি': 'কৃষি',
+	'চিকিৎসা': 'চিকিৎসা',
+	'আইন': 'আইন',
+	'ব্যবস্থাপনা': 'ব্যবস্থাপনা',
+	'পেট্রোলিয়াম': 'পেট্রোলিয়াম',
+	'বিদ্যুৎ': 'বিদ্যুৎ',
+	'কম্পিউটার': 'কম্পিউটার',
+	'ইন্টারনেট': 'ইন্টারনেট',
+	'অ্যান্ড্রয়েড': 'অ্যান্ড্রয়েড',
+	'কৃত্রিম বুদ্ধিমত্তা': 'কৃত্রিম বুদ্ধিমত্তা',
+	'মেশিন লার্নিং': 'মেশিন লার্নিং',
+	'ব্লকচেইন': 'ব্লকচেইন',
+	'বিটকয়েন': 'বিটকয়েন',
+	'চাঁদ': 'চাঁদ',
+	'গ্রহ': 'গ্রহ',
+	'নক্ষত্র': 'নক্ষত্র',
+	'পরিবেশ': 'পরিবেশ',
+	'জলবায়ু পরিবর্তন': 'জলবায়ু পরিবর্তন',
+	'গ্লোবাল ওয়ার্মিং': 'গ্লোবাল ওয়ার্মিং',
+	'প্লাস্টিক দূষণ': 'প্লাস্টিক দূষণ',
+	'বায়ু দূষণ': 'বায়ু দূষণ',
+	'সবজি': 'সবজি',
+	'ফল': 'ফল',
+	'ভাত': 'ভাত',
+	'মাছ': 'মাছ',
+	'মাংস': 'মাংস',
+	'ডাল': 'ডাল',
+	'ভর্তা': 'ভর্তা',
+	'বিরিয়ানি': 'বিরিয়ানি',
+	'দস্তা': 'দস্তা',
+	'রুটি': 'রুটি',
+	'নান': 'নান',
+	'ইচলি': 'ইচলি',
+	'চিংড়ি': 'চিংড়ি',
+	'রুই': 'রুই',
+	'কাতল': 'কাতল',
+	'টেংরা': 'টেংরা',
+	'তেলাপিয়া': 'তেলাপিয়া',
+	'কব্জি': 'কব্জি',
+	'লাউ': 'লাউ',
+	'কুমড়ো': 'কুমড়ো',
+	'পটল': 'পটল',
+	'ঝিঙ্গা': 'ঝিঙ্গা',
+	'শিম': 'শিম',
+	'মসুর ডাল': 'মসুর ডাল',
+	'মুগ ডাল': 'মুগ ডাল',
+	'চনা ডাল': 'চনা ডাল',
+	'কাঁচা আম': 'কাঁচা আম',
+	'কাঁচা পেঁপে': 'কাঁচা পেঁপে',
+	'কাঁচা কলা': 'কাঁচা কলা',
+	'আলু': 'আলু',
+	'পটাতো': 'পটাতো',
+	'টমেটো': 'টমেটো',
+	'বেগুন': 'বেগুন',
+	'গাজর': 'গাজর',
+	'মুলা': 'মুলা',
+	'চিনি': 'চিনি',
+	'লবণ': 'লবণ',
+	'তেল': 'তেল',
+	'ঘি': 'ঘি',
+	'দুধ': 'দুধ',
+	'দই': 'দই',
+	'রসমালাই': 'রসমালাই',
+	'বরফ': 'বরফ',
+	'কলকাতা': 'কলকাতা',
+	'চট্টগ্রাম': 'চট্টগ্রাম',
+	'সিলেট': 'সিলেট',
+	'রাজশাহী': 'রাজশাহী',
+	'খুলনা': 'খুলনা',
+	'বরিশাল': 'বরিশাল',
+	'রংপুর': 'রংপুর',
+	'ময়মনসিংহ': 'ময়মনসিংহ',
+	'কক্সবাজার': 'কক্সবাজার'
 };
 
 export const GET = async ({ url }: { url: URL }) => {
@@ -166,7 +299,7 @@ export const GET = async ({ url }: { url: URL }) => {
 			hasMore: false,
 			results: [],
 			total: 0
-		});
+		}, { headers: { 'Cache-Control': 'public, max-age=30, s-maxage=60' } });
 	}
 
 	const poolKey = `${query.toLowerCase()}|${category}|${lang}`;
@@ -248,7 +381,7 @@ export const GET = async ({ url }: { url: URL }) => {
 			hasMore: page < totalPages,
 			results: imgResults,
 			total: totalEst
-		});
+		}, { headers: { 'Cache-Control': 'public, max-age=300, s-maxage=600, stale-while-revalidate=1800' } });
 	}
 
 	// 2. Standard Search Results (Multi-source with real pagination per page)
@@ -342,7 +475,7 @@ export const GET = async ({ url }: { url: URL }) => {
 										domain.includes('.ac.bd')
 											? 0.98
 											: 0.82;
-									const freshness = 0.85;
+									const freshness = computeFreshness(category);
 									const score = parseFloat(
 										(bm25 * 0.55 + authority * 0.35 + freshness * 0.1 - idx * 0.015).toFixed(3)
 									);
@@ -422,7 +555,7 @@ export const GET = async ({ url }: { url: URL }) => {
 										domain.includes('.ac.bd')
 											? 0.98
 											: 0.82;
-									const freshness = 0.85;
+									const freshness = computeFreshness(category);
 									const score = parseFloat(
 										(bm25 * 0.55 + authority * 0.35 + freshness * 0.1 - i * 0.015).toFixed(3)
 									);
@@ -517,6 +650,7 @@ export const GET = async ({ url }: { url: URL }) => {
 			}
 
 			if (rawCollectedPool.length > 0) {
+				rawCollectedPool.sort((a, b) => b.score - a.score);
 				setPoolToCache(poolKey, rawCollectedPool, Math.max(rawCollectedPool.length * 10, 50));
 				for (const item of rawCollectedPool.slice(0, pageSize)) {
 					addPageResult(item);
@@ -569,7 +703,7 @@ export const GET = async ({ url }: { url: URL }) => {
 								signals: {
 									bm25,
 									authority: 0.99,
-									freshness: 0.85,
+									freshness: computeFreshness(category),
 									explanation:
 										lang === 'bn'
 											? `${sourceLabel} প্রাসঙ্গিকতা ${(bm25 * 100).toFixed(0)}%`
@@ -692,6 +826,8 @@ export const GET = async ({ url }: { url: URL }) => {
 		cached: Boolean(cachedPool)
 	});
 
+	pageResults.sort((a, b) => b.score - a.score);
+
 	return json({
 		query,
 		category,
@@ -704,5 +840,11 @@ export const GET = async ({ url }: { url: URL }) => {
 		knowledge,
 		didYouMean,
 		total: totalEst
+	}, {
+		headers: {
+			'Cache-Control': 'public, max-age=300, s-maxage=600, stale-while-revalidate=1800',
+			'X-Content-Type-Options': 'nosniff',
+			'X-Response-Time': `${durationMs}ms`
+		}
 	});
 };

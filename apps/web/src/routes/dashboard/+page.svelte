@@ -88,6 +88,8 @@
 
 <svelte:head>
 	<title>লাইভ সিস্টেম ও ইঞ্জিন ড্যাশবোর্ড — {t('appName')}</title>
+	<meta name="robots" content="noindex, nofollow, noarchive" />
+	<meta name="description" content="সন্ধান সিস্টেমের লাইভ টেলিমেট্রি ও পারফরম্যান্স ড্যাশবোর্ড।" />
 </svelte:head>
 
 <section class="dashboard-container">

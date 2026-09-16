@@ -4,6 +4,20 @@
 
 <svelte:head>
 	<title>সন্ধান উন্মুক্ত ঘোষণা (Public Launch) — {t('appName')}</title>
+	<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+	<meta name="description" content="সন্ধান v0.1.0 «প্রথম ভোর» — উন্মুক্ত, উন্মুক্ত ও গোপনীয়তা-প্রথম সার্চ ইঞ্জিনের পলিশ।" />
+	<link rel="canonical" href="https://sandhan.site/launch" />
+	<meta property="og:type" content="article" />
+	<meta property="og:url" content="https://sandhan.site/launch" />
+	<meta property="og:site_name" content="সন্ধান (Sandhan)" />
+	<meta property="og:title" content="সন্ধান উন্মুক্ত ঘোষণা (Public Launch) — {t('appName')}" />
+	<meta property="og:description" content="সন্ধান v0.1.0 «প্রথম ভোর» — সার্চ, এখন আপনার নিজের হাতে। একটি মুক্ত, উন্মুক্ত ও গোপনীয়তা-প্রথম সার্চ ইঞ্জিন।" />
+	<meta property="og:image" content="https://sandhan.site/favicon.svg" />
+	<meta name="twitter:card" content="summary_large_image" />
+	<meta name="twitter:url" content="https://sandhan.site/launch" />
+	<meta name="twitter:title" content="সন্ধান উন্মুক্ত ঘোষণা (Public Launch)" />
+	<meta name="twitter:description" content="সন্ধান v0.1.0 «প্রথম ভোর» — উন্মুক্ত ও গোপনীয়তা-প্রথম বাংলা সার্চ ইঞ্জিন।" />
+	<meta name="twitter:image" content="https://sandhan.site/favicon.svg" />
 </svelte:head>
 
 <article class="launch-page">
