@@ -15,7 +15,8 @@
 	let isSearchRoute = true;
 
 	// The search page renders its own Google-style chrome (home top bar / SERP header).
-	$: isSearchRoute = $page.url.pathname === '/' || $page.url.pathname === '';
+	// `pathname` is always at least `/`, so only the root route needs checking.
+	$: isSearchRoute = $page.url.pathname === '/';
 
 	onMount(() => {
 		currentTheme =
