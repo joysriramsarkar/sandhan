@@ -15,7 +15,9 @@
 
 - 🌐 **Universal Open Web Search**: Comprehensive search results across the entire internet for people, websites, blogs, wikis, code repositories, images, and news.
 - 🔐 **Zero-Knowledge Client Encryption**: Search history is encrypted in your local browser using military-grade **AES-256-GCM** with PBKDF2 key derivation. Zero queries are logged on the server.
+- 🎨 **Google Search-Grade Interface**: Home page, SERP, tabs, AI Overview, autocomplete, pagination and footer all follow the Google Search design reference — see [`/design`](https://sandhan.site/design) and [`docs/DESIGN.md`](docs/DESIGN.md).
 - 📱 **Mobile-First Responsive Interface**: Clean, fast, and optimized interface designed for smartphones, tablets, and desktops alike.
+- 🔤 **On-Device Autocomplete & Voice Search**: Suggestions, Bengali typo correction, `!bang` hints and Web Speech API voice input are computed locally — no keystroke leaves the browser.
 - 👓 **Transparent Ranking & Goggles**: Inspect ranking signals (BM25, Authority, Freshness) behind every result and apply custom declarative rules to customize ranking.
 - ⚡ **Instant Answers & Calculator**: Math evaluator supporting Bengali and Arabic numerals, unit and currency conversions, and fast bang shortcuts (`!w`, `!gh`, `!yt`, `!ddg`, `!g`).
 - 📚 **Knowledge Graph Cards**: Real-time Wikipedia entity summaries and infoboxes localized to your selected language.

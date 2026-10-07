@@ -4,8 +4,8 @@
   "description": "একটি উন্মুক্ত, সার্বজনীন ও গোপনীয়তা-প্রথম সার্চ ইঞ্জিন",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0e1513",
-  "theme_color": "#0e7a63",
+  "background_color": "#ffffff",
+  "theme_color": "#1a73e8",
   "lang": "bn",
   "orientation": "portrait-primary",
   "icons": [

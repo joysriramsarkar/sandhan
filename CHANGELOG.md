@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [Unreleased]
+
+### Changed
+- **Google Search design language (no exceptions)**: the entire web interface now follows Google Search's reference design — white surface (`#ffffff` / `#202124` dark), `#1a0dab` result titles, `Roboto` + `Noto Sans Bengali` typography, 24px search pill with mic/Lens icons, 652px results column with 380px knowledge panel, blue-underline tabs, `Tools` panel, People-Also-Ask accordion, two-column related searches, numbered pagination and the two-row Google footer. Global `--g-*` tokens live in `+layout.svelte` and are documented in `docs/DESIGN.md`.
+- **Home page** rebuilt as a Google-style landing page: multicolour `সন্ধান` wordmark, AI Mode pill, `সন্ধান সার্চ` / `আমি ভাগ্যবান বোধ করছি` buttons and the "offered in বাংলা / English / हिन्दी" language line.
+- **Standalone `sandhan.html`** and the **browser extension** (popup + options) re-skinned with the same Google palette, pill search fields, flat result items and coloured wordmark.
+
+### Added
+- **On-device autocomplete** (`src/lib/suggest.ts` + `SearchBox.svelte`): session-memory suggestions, Bengali typo corrections, bang hints and query refinements — nothing is sent to a server. Covered by `suggest.test.ts`.
+- **Voice search (Web Speech API)** and **Lens-style image search** entry points in the search pill.
+- **Google-style AI Overview card** with gradient sparkle, source chips, copy/collapse actions.
+- **Design system reference page** at `/design` plus `docs/DESIGN.md` and refreshed `brand/tokens.json`.
+- **People Also Ask** accordion, **related searches** grid and result-count/timing line (`প্রায় N ফলাফল (x.xx সেকেন্ড)`).
+
+### Fixed
+- `api/ai/+server.ts` implicit-`any` callbacks now typed (`w: string`); `npm run check` is clean (0 errors, 0 warnings).
+- Vite dev server allows any `Host` header (`allowedHosts: true`) so self-hosted/proxied deployments and preview hosts are not rejected with HTTP 403.
+
+---
+
 ## [0.1.0 «প্রথম ভোর»] - 2026-08-30
 
 ### Added

@@ -104,9 +104,9 @@
 		margin-bottom: 6px;
 	}
 	.page-title {
-		font-family: 'Noto Serif Bengali', serif;
+		font-family: 'Roboto', 'Noto Sans Bengali', Arial, sans-serif;
 		font-size: clamp(1.6rem, 5vw, 2.4rem);
-		font-weight: 900;
+		font-weight: 500;
 		color: var(--ink);
 		margin-bottom: 6px;
 	}
@@ -117,14 +117,14 @@
 	.manifesto-card, .issues-card {
 		background: var(--bg-elev);
 		border: 1px solid var(--line);
-		border-radius: 16px;
+		border-radius: 8px;
 		padding: clamp(16px, 4vw, 30px);
 		box-shadow: var(--shadow);
 		margin-bottom: 20px;
 		word-break: break-word;
 	}
 	.manifesto-card h2, .issues-card h2 {
-		font-family: 'Noto Serif Bengali', serif;
+		font-family: 'Roboto', 'Noto Sans Bengali', Arial, sans-serif;
 		font-size: 1.3rem;
 		margin-bottom: 12px;
 		color: var(--ink);
@@ -144,7 +144,7 @@
 	.pillar {
 		background: var(--bg);
 		border: 1px solid var(--line);
-		border-radius: 12px;
+		border-radius: 8px;
 		padding: 14px;
 	}
 	.p-icon {
@@ -152,7 +152,7 @@
 		margin-bottom: 6px;
 	}
 	.pillar h4 {
-		font-family: 'Noto Serif Bengali', serif;
+		font-family: 'Roboto', 'Noto Sans Bengali', Arial, sans-serif;
 		font-size: 1rem;
 		margin-bottom: 4px;
 		color: var(--ink);
