@@ -8,46 +8,52 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
-    href="https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali:wght@500;700;900&family=Noto+Sans+Bengali:wght@400;500;600;700&family=Outfit:wght@400;600;700;900&family=IBM+Plex+Mono:wght@400;600&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap"
     rel="stylesheet">
   <style>
+    /* Google design tokens — light */
     :root,
     [data-theme="light"] {
-      --bg: #f7f4ee;
+      --bg: #ffffff;
       --bg-elev: #ffffff;
-      --bg-soft: #efe9dd;
-      --ink: #1c2321;
-      --ink-soft: #5b6663;
-      --ink-faint: #8a938f;
-      --line: #e3dccc;
-      --accent: #0e7a63;
-      --accent-hover: #0a5c4a;
+      --bg-soft: #f8f9fa;
+      --ink: #202124;
+      --ink-soft: #4d5156;
+      --ink-faint: #70757a;
+      --line: #dfe1e5;
+      --divider: #ebebeb;
+      --accent: #1a73e8;
+      --accent-hover: #1765cc;
       --accent-ink: #ffffff;
-      --warm: #e0762f;
-      --warm-soft: #fbe8d8;
-      --chip: #e7f2ee;
-      --code: #12312a;
-      --shadow: 0 10px 30px rgba(28, 35, 33, 0.08);
-      --glow: radial-gradient(600px 300px at 50% -80px, rgba(14, 122, 99, 0.14), transparent 70%);
+      --link: #1a0dab;
+      --warm: #f9ab00;
+      --warm-soft: #fef7e0;
+      --chip: #f1f3f4;
+      --code: #202124;
+      --shadow: 0 1px 6px rgba(32, 33, 36, 0.28);
+      --glow: none;
     }
 
+    /* Google design tokens — dark */
     [data-theme="dark"] {
-      --bg: #0e1513;
-      --bg-elev: #152019;
-      --bg-soft: #1a2620;
-      --ink: #e9efe9;
-      --ink-soft: #a3b3ab;
-      --ink-faint: #6f7f77;
-      --line: #263830;
-      --accent: #2fbf9a;
-      --accent-hover: #3ad9af;
-      --accent-ink: #06231b;
-      --warm: #f0954f;
-      --warm-soft: #3a2a1a;
-      --chip: #1c332b;
-      --code: #0c1f1a;
-      --shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-      --glow: radial-gradient(600px 300px at 50% -80px, rgba(47, 191, 154, 0.12), transparent 70%);
+      --bg: #202124;
+      --bg-elev: #202124;
+      --bg-soft: #303134;
+      --ink: #e8eaed;
+      --ink-soft: #bdc1c6;
+      --ink-faint: #9aa0a6;
+      --line: #5f6368;
+      --divider: #3c4043;
+      --accent: #8ab4f8;
+      --accent-hover: #aecbfa;
+      --accent-ink: #202124;
+      --link: #99c3ff;
+      --warm: #fdd663;
+      --warm-soft: #3f3a22;
+      --chip: #303134;
+      --code: #e8eaed;
+      --shadow: 0 1px 6px rgba(0, 0, 0, 0.6);
+      --glow: none;
     }
 
     * {
@@ -61,7 +67,7 @@
     }
 
     body {
-      font-family: "Noto Sans Bengali", sans-serif;
+      font-family: "Roboto", "Noto Sans Bengali", Arial, sans-serif;
       background: var(--bg);
       color: var(--ink);
       line-height: 1.65;
@@ -75,18 +81,22 @@
     h2,
     h3,
     .serif {
-      font-family: "Noto Serif Bengali", serif;
+      font-family: "Roboto", "Noto Sans Bengali", Arial, sans-serif;
     }
 
     code,
     pre,
     .mono {
-      font-family: "IBM Plex Mono", monospace;
+      font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
     }
 
     a {
-      color: var(--accent);
+      color: var(--link);
       text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
     }
 
     button {
@@ -100,41 +110,38 @@
       position: sticky;
       top: 0;
       z-index: 50;
-      background: color-mix(in srgb, var(--bg) 88%, transparent);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--line);
+      background: var(--bg);
+      border-bottom: 1px solid var(--divider);
     }
 
     .bar {
-      max-width: 1100px;
+      max-width: 1400px;
       margin: 0 auto;
       display: flex;
       align-items: center;
-      gap: 12px;
-      padding: 12px 20px;
+      gap: 28px;
+      height: 64px;
+      padding: 0 24px;
     }
 
     .logo {
       display: flex;
       align-items: center;
-      gap: 10px;
-      font-family: "Noto Serif Bengali", serif;
-      font-weight: 900;
-      font-size: 1.4rem;
-      color: var(--ink);
+      font-family: "Roboto", "Noto Sans Bengali", Arial, sans-serif;
+      font-weight: 500;
+      font-size: 1.5rem;
+      letter-spacing: -0.02em;
+      line-height: 1;
     }
 
-    .logo .mark {
-      width: 36px;
-      height: 36px;
-      border-radius: 10px;
-      background: linear-gradient(135deg, var(--accent), var(--warm));
-      display: grid;
-      place-items: center;
-      color: #fff;
-      font-size: 19px;
-      box-shadow: 0 4px 12px rgba(14, 122, 99, 0.25);
-    }
+    .logo .w0 { color: #4285f4; }
+    .logo .w1 { color: #ea4335; }
+    .logo .w2 { color: #fbbc05; }
+    .logo .w3 { color: #34a853; }
+    [data-theme="dark"] .logo .w0 { color: #8ab4f8; }
+    [data-theme="dark"] .logo .w1 { color: #f28b82; }
+    [data-theme="dark"] .logo .w2 { color: #fdd663; }
+    [data-theme="dark"] .logo .w3 { color: #81c995; }
 
     nav {
       margin-left: auto;
@@ -144,49 +151,46 @@
     }
 
     .tab-btn {
-      padding: 8px 16px;
-      border-radius: 10px;
+      padding: 10px 12px 14px;
+      border-bottom: 3px solid transparent;
       background: transparent;
       color: var(--ink-soft);
-      font-size: 0.95rem;
-      font-weight: 600;
-      transition: all 0.2s;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: color 0.15s, border-color 0.15s;
     }
 
     .tab-btn:hover {
-      background: var(--bg-soft);
       color: var(--ink);
     }
 
     .tab-btn.active {
-      background: var(--bg-elev);
-      color: var(--accent);
-      box-shadow: var(--shadow);
-      border: 1px solid var(--line);
+      color: var(--ink);
+      border-bottom-color: var(--accent);
     }
 
     .icon-btn {
-      width: 38px;
-      height: 38px;
-      border-radius: 10px;
-      border: 1px solid var(--line);
-      background: var(--bg-elev);
-      color: var(--ink);
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: none;
+      background: transparent;
+      color: var(--ink-soft);
       font-size: 16px;
       display: grid;
       place-items: center;
-      transition: transform 0.15s, background 0.2s;
+      transition: background 0.15s;
     }
 
     .icon-btn:hover {
-      transform: scale(1.05);
+      background: var(--bg-soft);
     }
 
     main {
-      max-width: 1100px;
+      max-width: 1400px;
       width: 100%;
       margin: 0 auto;
-      padding: 30px 20px 80px;
+      padding: 24px 24px 60px;
       flex: 1;
     }
 
@@ -213,33 +217,39 @@
 
     /* Buttons */
     .btn {
-      padding: 10px 18px;
-      border-radius: 10px;
-      font-weight: 600;
-      font-size: 0.92rem;
+      padding: 8px 16px;
+      border-radius: 4px;
+      font-weight: 500;
+      font-size: 0.88rem;
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      transition: all 0.2s;
+      transition: box-shadow 0.15s, background 0.15s, border-color 0.15s;
     }
 
     .btn-accent {
       background: var(--accent);
-      color: var(--accent-ink);
+      color: #ffffff;
+      border: 1px solid var(--accent);
     }
 
     .btn-accent:hover {
       background: var(--accent-hover);
+      border-color: var(--accent-hover);
+      text-decoration: none;
     }
 
     .btn-ghost {
-      background: var(--bg-elev);
-      color: var(--ink);
-      border: 1px solid var(--line);
+      background: var(--bg-soft);
+      color: var(--ink-soft);
+      border: 1px solid var(--bg-soft);
     }
 
     .btn-ghost:hover {
-      background: var(--bg-soft);
+      border-color: var(--line);
+      color: var(--ink);
+      box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+      text-decoration: none;
     }
 
     /* Home View */
@@ -254,25 +264,34 @@
     }
 
     .hero-logo {
-      font-size: 4.2rem;
-      font-weight: 900;
-      letter-spacing: -1.5px;
-      background: linear-gradient(135deg, var(--ink) 40%, var(--accent));
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
-      margin-bottom: 8px;
+      display: flex;
+      align-items: baseline;
+      font-family: "Roboto", "Noto Sans Bengali", Arial, sans-serif;
+      font-size: clamp(3rem, 11vw, 5.4rem);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1;
+      margin-bottom: 10px;
     }
 
+    .hero-logo .w0 { color: #4285f4; }
+    .hero-logo .w1 { color: #ea4335; }
+    .hero-logo .w2 { color: #fbbc05; }
+    .hero-logo .w3 { color: #34a853; }
+    [data-theme="dark"] .hero-logo .w0 { color: #8ab4f8; }
+    [data-theme="dark"] .hero-logo .w1 { color: #f28b82; }
+    [data-theme="dark"] .hero-logo .w2 { color: #fdd663; }
+    [data-theme="dark"] .hero-logo .w3 { color: #81c995; }
+
     .hero-tagline {
-      font-size: 1.15rem;
+      font-size: 0.95rem;
       color: var(--ink-soft);
-      margin-bottom: 28px;
+      margin-bottom: 26px;
     }
 
     .search-container {
       width: 100%;
-      max-width: 650px;
+      max-width: 584px;
       position: relative;
     }
 
@@ -280,43 +299,72 @@
       width: 100%;
       display: flex;
       align-items: center;
+      gap: 4px;
       background: var(--bg-elev);
-      border: 2px solid var(--line);
-      border-radius: 18px;
-      padding: 6px 10px 6px 18px;
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      height: 44px;
+      padding: 0 8px 0 14px;
+      transition: box-shadow 0.15s, border-color 0.15s, background 0.15s;
+    }
+
+    .search-bar:hover {
       box-shadow: var(--shadow);
-      transition: border-color 0.2s, box-shadow 0.2s;
+      border-color: transparent;
     }
 
     .search-bar:focus-within {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 4px rgba(14, 122, 99, 0.15);
+      border-color: transparent;
+      box-shadow: 0 4px 6px rgba(32, 33, 36, 0.28);
+    }
+
+    [data-theme="dark"] .search-bar {
+      background: var(--bg-soft);
+      border-color: var(--bg-soft);
+    }
+
+    .search-bar .sb-icon {
+      display: inline-flex;
+      align-items: center;
+      color: #9aa0a6;
+      flex-shrink: 0;
     }
 
     .search-bar input {
       flex: 1;
+      min-width: 0;
       border: none;
       outline: none;
       background: transparent;
-      font-size: 1.15rem;
+      font-size: 16px;
       color: var(--ink);
       font-family: inherit;
-      padding: 8px 4px;
+      padding: 0 6px 0 8px;
+      height: 100%;
+    }
+
+    .search-bar input::placeholder {
+      color: var(--ink-faint);
     }
 
     .search-bar button {
-      width: 44px;
-      height: 44px;
-      border-radius: 12px;
-      background: var(--accent);
-      color: #fff;
-      font-size: 1.2rem;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: transparent;
+      color: #9aa0a6;
       display: grid;
       place-items: center;
+      flex-shrink: 0;
+      transition: background 0.15s;
     }
 
     .search-bar button:hover {
-      background: var(--accent-hover);
+      background: var(--bg-soft);
+    }
+
+    .search-bar button svg {
+      display: block;
     }
 
     .bang-row {
@@ -328,15 +376,20 @@
     }
 
     .bang-chip {
-      padding: 5px 12px;
-      border-radius: 20px;
+      padding: 6px 14px;
+      border-radius: 16px;
       background: var(--chip);
-      color: var(--accent);
-      font-size: 0.82rem;
-      font-weight: 600;
+      color: var(--ink-soft);
+      font-size: 0.84rem;
+      font-weight: 500;
       cursor: pointer;
-      border: 1px solid var(--line);
-      transition: all 0.15s;
+      border: 1px solid transparent;
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    .bang-chip:hover {
+      background: var(--bg-soft);
+      border-color: var(--line);
     }
 
     .bang-chip:hover {
@@ -355,13 +408,17 @@
     .fcard {
       background: var(--bg-elev);
       border: 1px solid var(--line);
-      border-radius: 16px;
+      border-radius: 8px;
       padding: 18px;
       text-align: left;
       display: flex;
       gap: 14px;
       align-items: flex-start;
-      box-shadow: var(--shadow);
+      transition: box-shadow 0.15s;
+    }
+
+    .fcard:hover {
+      box-shadow: 0 1px 6px rgba(32, 33, 36, 0.18);
     }
 
     .fcard .icon {
@@ -402,45 +459,53 @@
 
     .category-tabs {
       display: flex;
-      gap: 6px;
-      border-bottom: 1px solid var(--line);
-      padding-bottom: 8px;
-      margin-bottom: 16px;
+      gap: 4px;
+      border-bottom: 1px solid var(--divider);
+      margin-bottom: 18px;
       overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .category-tabs::-webkit-scrollbar {
+      display: none;
     }
 
     .cat-btn {
-      padding: 6px 14px;
-      border-radius: 8px;
+      padding: 10px 14px 12px;
+      border-bottom: 3px solid transparent;
       background: transparent;
       color: var(--ink-soft);
       font-size: 0.9rem;
-      font-weight: 600;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    .cat-btn:hover {
+      color: var(--ink);
     }
 
     .cat-btn.active {
-      background: var(--bg-soft);
-      color: var(--accent);
+      color: var(--ink);
+      border-bottom-color: var(--accent);
     }
 
     /* Instant Card */
     .instant-box {
       background: var(--bg-elev);
-      border: 1px solid var(--accent);
-      border-radius: 14px;
-      padding: 18px;
-      margin-bottom: 20px;
-      box-shadow: var(--shadow);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 18px 20px;
+      margin-bottom: 24px;
       display: flex;
       align-items: center;
-      gap: 16px;
+      gap: 18px;
     }
 
     .instant-box .val {
-      font-family: "Outfit", sans-serif;
-      font-size: 2.2rem;
-      font-weight: 900;
-      color: var(--accent);
+      font-size: clamp(1.8rem, 5vw, 2.3rem);
+      font-weight: 400;
+      color: var(--ink);
+      line-height: 1.15;
     }
 
     .instant-box .expr {
@@ -450,85 +515,138 @@
 
     /* Result Item */
     .res-item {
-      background: var(--bg-elev);
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      padding: 18px;
-      margin-bottom: 14px;
-      box-shadow: var(--shadow);
-      transition: border-color 0.2s, transform 0.2s;
-    }
-
-    .res-item:hover {
-      border-color: var(--accent);
-      transform: translateY(-2px);
+      background: transparent;
+      border: none;
+      border-radius: 0;
+      padding: 0;
+      margin-bottom: 28px;
     }
 
     .res-source {
-      font-size: 0.78rem;
-      font-weight: 600;
-      color: var(--accent);
-      margin-bottom: 4px;
       display: flex;
       align-items: center;
-      gap: 8px;
-    }
-
-    .res-title {
-      font-size: 1.22rem;
-      font-weight: 700;
+      gap: 12px;
+      font-size: 0.82rem;
+      font-weight: 400;
+      color: var(--ink-soft);
       margin-bottom: 6px;
     }
 
-    .res-title a {
+    .res-source .fav-circle {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: var(--bg-soft);
+      border: 1px solid var(--divider);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .res-source .fav-circle img {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+    }
+
+    .res-source .src-lines {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    .res-source .src-name {
+      font-size: 0.86rem;
       color: var(--ink);
+      line-height: 18px;
+    }
+
+    .res-source .src-url {
+      font-size: 0.75rem;
+      color: var(--ink-soft);
+      line-height: 15px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 46vw;
+    }
+
+    .res-title {
+      font-size: 1.25rem;
+      font-weight: 400;
+      line-height: 1.3;
+      margin-bottom: 4px;
+      font-family: "Roboto", "Noto Sans Bengali", Arial, sans-serif;
+    }
+
+    .res-title a {
+      color: var(--link);
     }
 
     .res-title a:hover {
-      color: var(--accent);
+      text-decoration: underline;
+      color: var(--link);
     }
 
     .res-snippet {
-      font-size: 0.92rem;
+      font-size: 0.88rem;
       color: var(--ink-soft);
-      line-height: 1.6;
+      line-height: 1.58;
+    }
+
+    .res-snippet b {
+      color: var(--ink);
+      font-weight: 500;
     }
 
     .res-foot {
       display: flex;
       align-items: center;
-      gap: 12px;
-      margin-top: 10px;
+      gap: 16px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+
+    .res-foot a {
+      font-size: 0.82rem;
+      color: var(--accent);
     }
 
     .why-btn {
-      padding: 4px 10px;
-      border-radius: 6px;
-      background: var(--chip);
+      padding: 0;
+      border-radius: 0;
+      background: transparent;
       color: var(--accent);
-      font-size: 0.78rem;
-      font-weight: 600;
+      font-size: 0.82rem;
+      font-weight: 400;
+    }
+
+    .why-btn:hover {
+      text-decoration: underline;
     }
 
     /* Knowledge Panel */
     .knowledge-card {
       background: var(--bg-elev);
       border: 1px solid var(--line);
-      border-radius: 16px;
-      padding: 20px;
-      box-shadow: var(--shadow);
+      border-radius: 8px;
+      padding: 16px;
+      box-shadow: none;
     }
 
     .kp-title {
-      font-size: 1.35rem;
-      font-weight: 900;
+      font-size: 1.25rem;
+      font-weight: 400;
       margin-bottom: 4px;
+      font-family: "Roboto", "Noto Sans Bengali", Arial, sans-serif;
+      color: var(--ink);
     }
 
     .kp-sub {
-      font-size: 0.85rem;
-      color: var(--accent);
-      font-weight: 600;
+      font-size: 0.78rem;
+      color: var(--ink-faint);
+      font-weight: 400;
       margin-bottom: 12px;
     }
 
@@ -669,9 +787,8 @@
 
   <header>
     <div class="bar">
-      <a href="#" class="logo" onclick="switchView('home'); return false;">
-        <span class="mark">স</span>
-        <span>সন্ধান</span>
+      <a href="#" class="logo" onclick="switchView('home'); return false;" aria-label="সন্ধান">
+        <span class="w0">স</span><span class="w1">ন্</span><span class="w2">ধা</span><span class="w3">ন</span>
       </a>
       <nav>
         <button class="tab-btn active" id="tab-home" onclick="switchView('home')">সার্চ</button>
@@ -690,14 +807,27 @@
     <!-- ════════ VIEW 1: SEARCH HOME / SERP ════════ -->
     <section class="view active" id="view-home">
       <div id="home-landing" class="home-wrapper">
-        <div class="hero-logo">সন্ধান</div>
+        <div class="hero-logo" role="img" aria-label="সন্ধান">
+          <span class="w0">স</span><span class="w1">ন্</span><span class="w2">ধা</span><span class="w3">ন</span>
+        </div>
         <p class="hero-tagline">খুঁজুন নিশ্চিন্তে — আপনার সার্চ, শুধুই আপনার।</p>
 
         <div class="search-container">
           <div class="search-bar">
+            <span class="sb-icon" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+            </span>
             <input type="text" id="q-home" placeholder="খুঁজুন… (যেমন: রবীন্দ্রনাথ ঠাকুর, ২৫ * ৪৮, !w বাংলাদেশ)"
               autocomplete="off">
-            <button onclick="handleSearch('q-home')">🔍</button>
+            <button type="button" onclick="voiceSearch('q-home')" title="ভয়েস দিয়ে খুঁজুন" aria-label="ভয়েস সার্চ">
+              <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285f4" d="M12 15c1.66 0 3-1.34 3-3V6c0-1.66-1.34-3-3-3S9 4.34 9 6v6c0 1.66 1.34 3 3 3z"/><path fill="#34a853" d="M17 12c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-2.08c3.39-.49 6-3.39 6-6.92h-2z"/><path fill="#ea4335" d="M12 3c-1.66 0-3 1.34-3 3h6c0-1.66-1.34-3-3-3z"/></svg>
+            </button>
+            <button type="button" onclick="lensSearch('q-home')" title="ছবি দিয়ে খুঁজুন" aria-label="ছবি সার্চ">
+              <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285f4" d="M12 8a4 4 0 1 0 4 4 4 4 0 0 0-4-4zm0 6a2 2 0 1 1 2-2 2 2 0 0 1-2 2z"/><path fill="#34a853" d="M9 3a1.5 1.5 0 0 0-1.4 1H6a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h12a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3h-1.6A1.5 1.5 0 0 0 15 3zM5 7.6A1.6 1.6 0 0 1 6.6 6h1.2L8.4 4.8h7.2L16.2 6h1.2A1.6 1.6 0 0 1 19 7.6v9.8a1.6 1.6 0 0 1-1.6 1.6H6.6A1.6 1.6 0 0 1 5 17.4z"/><path fill="#fbbc05" d="M3 7a3 3 0 0 1 3-3h2.4L8.4 5H6.6A1.6 1.6 0 0 0 5 6.6V10H3z"/><path fill="#ea4335" d="M21 17a3 3 0 0 1-3 3h-2.4l1-1h1.4A1.6 1.6 0 0 0 19 17.4V14h2z"/></svg>
+            </button>
+            <button type="button" onclick="handleSearch('q-home')" title="অনুসন্ধান" aria-label="অনুসন্ধান">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+            </button>
           </div>
         </div>
 
@@ -738,9 +868,17 @@
       <div id="serp-view" style="display: none;">
         <div class="serp-head">
           <button class="btn btn-ghost" onclick="backToHome()">← হোম</button>
-          <div class="search-bar" style="flex: 1; max-width: 600px;">
+          <div class="search-bar" style="flex: 1; max-width: 692px;">
+            <span class="sb-icon" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+            </span>
             <input type="text" id="q-serp" autocomplete="off">
-            <button onclick="handleSearch('q-serp')">🔍</button>
+            <button type="button" onclick="voiceSearch('q-serp')" title="ভয়েস দিয়ে খুঁজুন" aria-label="ভয়েস সার্চ">
+              <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285f4" d="M12 15c1.66 0 3-1.34 3-3V6c0-1.66-1.34-3-3-3S9 4.34 9 6v6c0 1.66 1.34 3 3 3z"/><path fill="#34a853" d="M17 12c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-2.08c3.39-.49 6-3.39 6-6.92h-2z"/><path fill="#ea4335" d="M12 3c-1.66 0-3 1.34-3 3h6c0-1.66-1.34-3-3-3z"/></svg>
+            </button>
+            <button type="button" onclick="handleSearch('q-serp')" title="অনুসন্ধান" aria-label="অনুসন্ধান">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+            </button>
           </div>
         </div>
 
@@ -1210,7 +1348,7 @@
 
           resultsSlot.innerHTML = items.map((it, idx) => `
         <div class="res-item">
-          <div class="res-source">🌐 bn.wikipedia.org · ফলাফল #${idx + 1}</div>
+          ${sourceRow('bn.wikipedia.org', `https://bn.wikipedia.org/wiki/${encodeURIComponent(it.title)}`)}
           <h3 class="res-title">
             <a href="https://bn.wikipedia.org/wiki/${encodeURIComponent(it.title)}" target="_blank">${escapeHtml(it.title)}</a>
           </h3>
@@ -1248,7 +1386,7 @@
           if (ddgItems.length > 0) {
             resultsSlot.innerHTML = ddgItems.map((it, idx) => `
           <div class="res-item">
-            <div class="res-source">🌐 উন্মুক্ত ওয়েব ফলাফল · #${idx + 1}</div>
+            ${sourceRow(domainOf(it.FirstURL), it.FirstURL)}
             <h3 class="res-title"><a href="${it.FirstURL}" target="_blank">${escapeHtml(it.Text.split(' - ')[0] || query)}</a></h3>
             <div class="res-snippet">${escapeHtml(it.Text)}</div>
             <div class="res-foot">
@@ -1270,7 +1408,7 @@
 
       resultsSlot.innerHTML = displayList.map((it, idx) => `
     <div class="res-item">
-      <div class="res-source">🌐 ${escapeHtml(it.source)}</div>
+      ${sourceRow(domainOf(it.url), it.url)}
       <h3 class="res-title"><a href="${it.url}" target="_blank">${escapeHtml(it.title)}</a></h3>
       <div class="res-snippet">${escapeHtml(it.snippet)}</div>
       <div class="res-foot">
@@ -1292,6 +1430,71 @@
       } else {
         kpSlot.innerHTML = '';
       }
+    }
+
+    /* ───────── GOOGLE-STYLE SOURCE ROW HELPERS ───────── */
+    function domainOf(url) {
+      try {
+        return new URL(url).hostname.replace(/^www\./, '');
+      } catch (_) {
+        return 'web';
+      }
+    }
+
+    function breadcrumbOf(url) {
+      try {
+        const parsed = new URL(url);
+        const host = parsed.hostname.replace(/^www\./, '');
+        const parts = parsed.pathname.split('/').filter(Boolean).slice(0, 3);
+        return [host].concat(parts).join(' › ');
+      } catch (_) {
+        return url;
+      }
+    }
+
+    function sourceRow(domain, url) {
+      const host = (domain || '').replace(/^www\./, '') || 'web';
+      const crumb = breadcrumbOf(url || '');
+      return `<div class="res-source">
+        <span class="fav-circle"><img src="https://icons.duckduckgo.com/ip3/${host}.ico" alt="" onerror="this.style.visibility='hidden'"></span>
+        <span class="src-lines">
+          <span class="src-name">${escapeHtml(host)}</span>
+          <span class="src-url">${escapeHtml(crumb)}</span>
+        </span>
+      </div>`;
+    }
+
+    /* ───────── VOICE SEARCH & LENS ───────── */
+    function voiceSearch(inputId) {
+      const input = document.getElementById(inputId);
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SR) {
+        alert('দুঃখিত, এই ব্রাউজারে ভয়েস সার্চ সমর্থিত নয়। টাইপ করে খুঁজুন।');
+        input.focus();
+        return;
+      }
+      const recognition = new SR();
+      recognition.lang = 'bn-BD';
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+      recognition.onresult = (event) => {
+        input.value = event.results[0][0].transcript;
+        handleSearch(inputId);
+      };
+      recognition.onerror = () => alert('ভয়েস সার্চ ব্যর্থ হয়েছে — আবার চেষ্টা করুন।');
+      try {
+        recognition.start();
+      } catch (_) { }
+    }
+
+    function lensSearch(inputId) {
+      const input = document.getElementById(inputId);
+      const query = (input.value || '').trim();
+      if (!query) {
+        input.focus();
+        return;
+      }
+      window.open(`https://commons.wikimedia.org/w/index.php?search=${encodeURIComponent(query)}`, '_blank');
     }
 
     /* ───────── WHY MODAL ───────── */

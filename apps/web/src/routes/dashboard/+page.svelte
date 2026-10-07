@@ -300,9 +300,9 @@
 		color: var(--accent);
 	}
 	.page-title {
-		font-family: 'Noto Serif Bengali', serif;
+		font-family: 'Roboto', 'Noto Sans Bengali', Arial, sans-serif;
 		font-size: clamp(1.6rem, 4vw, 2.2rem);
-		font-weight: 800;
+		font-weight: 400;
 		color: var(--ink);
 		margin-bottom: 4px;
 	}
@@ -341,7 +341,7 @@
 	.metric-card {
 		background: var(--bg-elev);
 		border: 1px solid var(--line);
-		border-radius: 16px;
+		border-radius: 8px;
 		padding: 20px 18px;
 		box-shadow: var(--shadow);
 		transition: transform 0.2s;
@@ -361,10 +361,10 @@
 		margin-bottom: 4px;
 	}
 	.m-val {
-		font-family: 'Outfit', sans-serif;
+		font-family: 'Roboto', 'Noto Sans Bengali', Arial, sans-serif;
 		font-size: 2rem;
-		font-weight: 800;
-		color: var(--accent);
+		font-weight: 400;
+		color: var(--ink);
 		line-height: 1.1;
 		margin-bottom: 6px;
 	}
@@ -382,7 +382,7 @@
 	.db-status-card {
 		background: var(--bg-elev);
 		border: 1.5px solid var(--line);
-		border-radius: 16px;
+		border-radius: 8px;
 		padding: 20px;
 		margin-bottom: 24px;
 		box-shadow: var(--shadow);
@@ -451,15 +451,15 @@
 	.section-card {
 		background: var(--bg-elev);
 		border: 1px solid var(--line);
-		border-radius: 16px;
+		border-radius: 8px;
 		padding: 22px;
 		margin-bottom: 24px;
 		box-shadow: var(--shadow);
 	}
 	.section-card h2 {
-		font-family: 'Noto Serif Bengali', serif;
+		font-family: 'Roboto', 'Noto Sans Bengali', Arial, sans-serif;
 		font-size: 1.2rem;
-		font-weight: 700;
+		font-weight: 500;
 		color: var(--ink);
 		margin-bottom: 16px;
 	}

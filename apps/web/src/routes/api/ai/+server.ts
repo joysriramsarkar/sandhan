@@ -142,7 +142,7 @@ function resolveDirectFact(
 
 	// 3. Bengali letter profile & position
 	const cleanWords = qLow.replace(/["'?,.;:!()[\]{}<>`~@#$%^&*+=_\-|\\/]/g, ' ').trim().split(/\s+/);
-	const singleBnChar = cleanWords.find((w) => w.length === 1 && (BN_SWAR.includes(w) || BN_BYANJAN.includes(w)));
+	const singleBnChar = cleanWords.find((w: string) => w.length === 1 && (BN_SWAR.includes(w) || BN_BYANJAN.includes(w)));
 
 	if (
 		singleBnChar &&
@@ -301,7 +301,7 @@ export const POST = async ({ request }: { request: Request }) => {
 		const qWords = qClean
 			.split(/\s+/)
 			.filter(
-				(w) =>
+				(w: string) =>
 					![
 						'কত', 'কি', 'কী', 'কেন', 'কীভাবে', 'কিভাবে', 'কোথায়', 'কখন', 'কে', 'কার', 'কোন', 'how', 'what', 'why', 'who', 'where', 'when', 'is', 'are', 'the', 'a', 'an'
 					].includes(w)
@@ -310,7 +310,7 @@ export const POST = async ({ request }: { request: Request }) => {
 		if (knowledge && knowledge.sourceUrl && knowledge.title) {
 			const titleLow = knowledge.title.toLowerCase();
 			const isKnowledgeRelevant =
-				qWords.length === 0 || qWords.some((w) => titleLow.includes(w) || w.includes(titleLow));
+				qWords.length === 0 || qWords.some((w: string) => titleLow.includes(w) || w.includes(titleLow));
 
 			if (isKnowledgeRelevant) {
 				sources.push({
@@ -331,7 +331,7 @@ export const POST = async ({ request }: { request: Request }) => {
 				const itemSnipLow = (item.snippet || '').toLowerCase();
 				const isRelevant =
 					qWords.length === 0 ||
-					qWords.some((w) => itemTitleLow.includes(w) || itemSnipLow.includes(w));
+					qWords.some((w: string) => itemTitleLow.includes(w) || itemSnipLow.includes(w));
 
 				if (isRelevant) {
 					seenUrls.add(item.url.toLowerCase());

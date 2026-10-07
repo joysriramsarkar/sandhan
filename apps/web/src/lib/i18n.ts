@@ -27,6 +27,10 @@ export const translations = {
 		copyAnswer: 'উত্তর কপি করুন',
 		copied: 'কপি করা হয়েছে!',
 		privacyNote: 'এই অনুসন্ধান প্রক্রিয়ায় কোনো ব্যবহারকারী ট্র্যাকার ব্যবহৃত হয়নি।',
+		feelingLucky: 'আমি ভাগ্যবান বোধ করছি',
+		offeredIn: 'সন্ধান উপলব্ধ:',
+		tools: 'Tools',
+		results: 'ফলাফল',
 		nav: { search: 'সার্চ', dashboard: 'ড্যাশবোর্ড', launch: 'ঘোষণা' }
 	},
 	en: {
@@ -50,6 +54,10 @@ export const translations = {
 		copyAnswer: 'Copy Answer',
 		copied: 'Copied!',
 		privacyNote: 'Zero trackers or profiling cookies were used in this search.',
+		feelingLucky: "I'm Feeling Lucky",
+		offeredIn: 'Sandhan offered in:',
+		tools: 'Tools',
+		results: 'Results',
 		nav: { search: 'Search', dashboard: 'Dashboard', launch: 'Launch' }
 	},
 	hi: {
@@ -73,6 +81,10 @@ export const translations = {
 		copyAnswer: 'उत्तर कॉपी करें',
 		copied: 'कॉपी किया गया!',
 		privacyNote: 'इस खोज प्रक्रिया में कोई उपयोगकर्ता ट्रैकर उपयोग नहीं किया गया।',
+		feelingLucky: 'मैं भाग्यशाली महसूस कर रहा हूँ',
+		offeredIn: 'संधान उपलब्ध है:',
+		tools: 'Tools',
+		results: 'परिणाम',
 		nav: { search: 'खोज', dashboard: 'डैशबोर्ड', launch: 'लॉन्च' }
 	}
 };
