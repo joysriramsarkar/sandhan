@@ -3,7 +3,7 @@
   "license": "AGPL-3.0-only",
   "private": true,
   "engines": {
-    "node": "20.x"
+    "node": "24.x"
   },
   "scripts": {
     "build": "cd apps/web && npm run build",

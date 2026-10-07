@@ -10,10 +10,20 @@ use std::time::{Duration, Instant};
 
 static BUCKETS: OnceLock<Mutex<HashMap<String, Bucket>>> = OnceLock::new();
 
-#[derive(Default)]
 struct Bucket {
     tokens: f64,
     last: Instant,
+}
+
+// `std::time::Instant` does not implement `Default`, so buckets are created
+// explicitly: an empty bucket whose refill clock starts now.
+impl Default for Bucket {
+    fn default() -> Self {
+        Self {
+            tokens: 0.0,
+            last: Instant::now(),
+        }
+    }
 }
 
 const CAP: f64 = 60.0;
